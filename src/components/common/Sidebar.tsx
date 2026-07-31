@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   FileText,
@@ -13,8 +13,11 @@ import {
   ChevronDown,
   ChevronRight,
   FolderOpen,
+  LogOut,
+  LogIn,
 } from 'lucide-react';
 import { useAppStore } from '../../hooks/useAppStore';
+import { CURRENT_USER } from '../../constants/mockData';
 
 interface SidebarProps {
   onOpenCreateNoteModal?: () => void;
@@ -22,7 +25,8 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateNoteModal }) => {
   const location = useLocation();
-  const { notes } = useAppStore();
+  const navigate = useNavigate();
+  const { notes, isLoggedIn, currentUser, logout } = useAppStore();
 
   const [isNotesMenuOpen, setIsNotesMenuOpen] = useState(true);
 
@@ -32,6 +36,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateNoteModal }) => {
   const isNotesActive = location.pathname.startsWith('/notes');
   const searchParams = new URLSearchParams(location.search);
   const currentTab = searchParams.get('tab') || (location.pathname === '/notes' ? 'all' : '');
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   return (
     <aside className="w-64 bg-surface border-r border-surface-border flex flex-col justify-between h-screen sticky top-0 z-30 select-none">
@@ -196,6 +205,40 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateNoteModal }) => {
             </div>
           </NavLink>
         </nav>
+      </div>
+
+      {/* Bottom User Profile Card & Logout Button */}
+      <div className="p-3 m-3 rounded-2xl bg-surface-hover/50 border border-surface-border/60 space-y-2">
+        {isLoggedIn ? (
+          <>
+            <div className="flex items-center gap-2.5 px-1.5 py-1">
+              <img
+                src={currentUser?.avatarUrl || CURRENT_USER.avatarUrl}
+                alt={currentUser?.fullName || CURRENT_USER.fullName}
+                className="h-8 w-8 rounded-full object-cover ring-2 ring-indigo-500/40 shrink-0"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold text-white truncate">{currentUser?.fullName || CURRENT_USER.fullName}</p>
+                <p className="text-[10px] text-slate-400 truncate">{currentUser?.email || CURRENT_USER.email}</p>
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-semibold transition-all focus:outline-none"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span>Đăng xuất</span>
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => navigate('/login')}
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all focus:outline-none"
+          >
+            <LogIn className="h-3.5 w-3.5" />
+            <span>Đăng nhập ngay</span>
+          </button>
+        )}
       </div>
     </aside>
   );
