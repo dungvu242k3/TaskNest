@@ -1,8 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Command, Bell, LogIn } from 'lucide-react';
+import { Search, Command, LogIn } from 'lucide-react';
 import { useAppStore } from '../../hooks/useAppStore';
 import { CURRENT_USER } from '../../constants/mockData';
+import { NotificationPopover } from './NotificationPopover';
 
 export const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -34,15 +35,8 @@ export const Header: React.FC = () => {
 
       {/* Right Header Actions: Notification Bell + Conditional Auth Button / User Profile Avatar */}
       <div className="flex items-center justify-end gap-3 w-48">
-        {/* Notifications */}
-        <button
-          aria-label="Thông báo"
-          title="Thông báo hệ thống"
-          className="relative p-2 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-surface-hover transition-colors focus:outline-none"
-        >
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
-        </button>
+        {/* Notifications Popover */}
+        <NotificationPopover />
 
         {/* Conditional Rendering based on Authentication State */}
         {!isLoggedIn ? (
