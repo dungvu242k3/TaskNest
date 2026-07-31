@@ -44,8 +44,17 @@ export const CommandPalette: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-start justify-center pt-20 p-4">
-      <div className="w-full max-w-2xl bg-surface border border-surface-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div
+      onClick={() => setCommandPaletteOpen(false)}
+      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-start justify-center pt-20 p-4"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Command Palette"
+        className="w-full max-w-2xl bg-surface border border-surface-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+      >
         {/* Search Header */}
         <div className="p-4 border-b border-surface-border flex items-center gap-3 bg-surface-hover/30">
           <Search className="h-5 w-5 text-indigo-400" />

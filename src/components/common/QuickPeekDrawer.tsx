@@ -20,8 +20,17 @@ export const QuickPeekDrawer: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs flex justify-end">
-      <div className="w-full max-w-lg bg-surface border-l border-surface-border h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-200">
+    <div
+      onClick={() => setQuickPeekNoteId(null)}
+      className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs flex justify-end"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Quick Peek Note Details"
+        className="w-full max-w-lg bg-surface border-l border-surface-border h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-200"
+      >
         {/* Drawer Header */}
         <div className="p-4 border-b border-surface-border flex items-center justify-between bg-surface-hover/30">
           <div className="flex items-center gap-2">

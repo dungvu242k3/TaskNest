@@ -13,7 +13,7 @@ interface NoteDetailPageProps {
 export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { notes, toggleChecklistItem, deleteNote } = useAppStore();
+  const { notes, toggleChecklistItem, deleteNote, updateNote, addChecklistItem } = useAppStore();
 
   const note = notes.find((n) => n.id === id);
 
@@ -36,25 +36,36 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
   }
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTitle(e.target.value);
+    const val = e.target.value;
+    setTitle(val);
+    updateNote(note.id, { title: val });
     setSavedStatus('Saving changes...');
     setTimeout(() => setSavedStatus('Saved 1s ago'), 800);
   };
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setContent(e.target.value);
+    const val = e.target.value;
+    setContent(val);
+    updateNote(note.id, { content: val });
     setSavedStatus('Saving changes...');
     setTimeout(() => setSavedStatus('Saved 1s ago'), 800);
+  };
+
+  const handleTogglePrivate = () => {
+    const nextPrivate = !isPrivate;
+    setIsPrivate(nextPrivate);
+    updateNote(note.id, { isPrivate: nextPrivate });
+  };
+
+  const handlePriorityChange = (newPriority: PriorityLevel) => {
+    setPriority(newPriority);
+    updateNote(note.id, { priority: newPriority });
   };
 
   const handleAddChecklist = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newChecklistText.trim()) return;
-    note.checklist.push({
-      id: `c-${Date.now()}`,
-      text: newChecklistText.trim(),
-      completed: false,
-    });
+    addChecklistItem(note.id, newChecklistText.trim());
     setNewChecklistText('');
   };
 
@@ -80,7 +91,7 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
         <div className="flex items-center gap-3">
           {/* Privacy Switcher */}
           <button
-            onClick={() => setIsPrivate(!isPrivate)}
+            onClick={handleTogglePrivate}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
               isPrivate
                 ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
@@ -120,7 +131,7 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
             <PriorityBadge priority={priority} />
             <select
               value={priority}
-              onChange={(e) => setPriority(e.target.value as PriorityLevel)}
+              onChange={(e) => handlePriorityChange(e.target.value as PriorityLevel)}
               className="bg-background text-xs text-slate-300 px-2 py-1 rounded-lg border border-surface-border focus:outline-none"
             >
               <option value="P1">Priority: P1 High</option>

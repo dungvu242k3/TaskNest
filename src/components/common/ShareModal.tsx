@@ -30,8 +30,17 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteTit
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="w-full max-w-lg bg-surface border border-surface-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Share Work Note"
+        className="w-full max-w-lg bg-surface border border-surface-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+      >
         {/* Header */}
         <div className="p-5 border-b border-surface-border flex items-center justify-between bg-surface-hover/30">
           <div className="flex items-center gap-2.5">
