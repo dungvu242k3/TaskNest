@@ -12,8 +12,10 @@ import {
   Clock,
   RotateCw,
   XCircle,
+  Trash2,
 } from 'lucide-react';
-import { MOCK_USERS, MOCK_ACTIVITIES } from '../constants/mockData';
+import { useAppStore } from '../hooks/useAppStore';
+import { MOCK_ACTIVITIES } from '../constants/mockData';
 
 interface TeamPageProps {
   onOpenShareModal?: () => void;
@@ -23,12 +25,15 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentTab = searchParams.get('tab') || 'members';
   const [memberSearch, setMemberSearch] = useState('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
+  const { teamMembers, removeTeamMember } = useAppStore();
 
   const handleTabChange = (tab: string) => {
     setSearchParams({ tab });
   };
 
-  const filteredMembers = MOCK_USERS.filter(
+  const filteredMembers = teamMembers.filter(
     (user) =>
       user.fullName.toLowerCase().includes(memberSearch.toLowerCase()) ||
       user.email.toLowerCase().includes(memberSearch.toLowerCase())
@@ -70,7 +75,7 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
               Thành viên nhóm
             </span>
             <div className="text-3xl font-extrabold text-white mt-1.5 font-mono">
-              {MOCK_USERS.length}
+              {teamMembers.length}
             </div>
             <p className="text-[11px] text-slate-400 mt-1">Quản trị viên & Thành viên</p>
           </div>
@@ -124,7 +129,7 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
             <Users className="h-4 w-4" />
             <span>Thành viên nhóm</span>
             <span className="ml-1 px-1.5 py-0.5 rounded-lg bg-slate-800 text-slate-300 text-[10px] font-mono">
-              {MOCK_USERS.length}
+              {teamMembers.length}
             </span>
           </button>
 
@@ -185,49 +190,86 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
                   <th className="py-4 px-6">Địa chỉ Email</th>
                   <th className="py-4 px-6">Vai trò trong workspace</th>
                   <th className="py-4 px-6">Trạng thái</th>
+                  <th className="py-4 px-6 text-right">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-surface-border/40 text-slate-200">
                 {filteredMembers.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="py-8 text-center text-slate-400">
+                    <td colSpan={5} className="py-8 text-center text-slate-400">
                       Không tìm thấy thành viên nào phù hợp với từ khóa "{memberSearch}"
                     </td>
                   </tr>
                 ) : (
-                  filteredMembers.map((user, idx) => (
-                    <tr key={user.id} className="hover:bg-surface-hover/40 transition-colors">
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={user.avatarUrl}
-                            alt={user.fullName}
-                            className="h-9 w-9 rounded-full object-cover ring-1 ring-indigo-500/30 shrink-0"
-                          />
-                          <span className="font-bold text-slate-100 text-sm">{user.fullName}</span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6 text-slate-400 font-mono">{user.email}</td>
-                      <td className="py-4 px-6">
-                        {idx === 0 ? (
-                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[11px] font-semibold">
-                            <ShieldCheck className="h-3.5 w-3.5" />
-                            Quản trị viên / Chủ nhóm
+                  filteredMembers.map((user, idx) => {
+                    const isOwner = user.id === 'usr-1' || idx === 0;
+
+                    return (
+                      <tr key={user.id} className="hover:bg-surface-hover/40 transition-colors">
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={user.avatarUrl}
+                              alt={user.fullName}
+                              className="h-9 w-9 rounded-full object-cover ring-1 ring-indigo-500/30 shrink-0"
+                            />
+                            <span className="font-bold text-slate-100 text-sm">{user.fullName}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-6 text-slate-400 font-mono">{user.email}</td>
+                        <td className="py-4 px-6">
+                          {isOwner ? (
+                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[11px] font-semibold">
+                              <ShieldCheck className="h-3.5 w-3.5" />
+                              Quản trị viên / Chủ nhóm
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold">
+                              Thành viên chính thức
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className="inline-flex items-center gap-1.5 text-emerald-400 font-semibold text-xs">
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            <span>Đang hoạt động</span>
                           </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold">
-                            Thành viên chính thức
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-4 px-6">
-                        <span className="inline-flex items-center gap-1.5 text-emerald-400 font-semibold text-xs">
-                          <CheckCircle2 className="h-3.5 w-3.5" />
-                          <span>Đang hoạt động</span>
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                        <td className="py-4 px-6 text-right">
+                          {isOwner ? (
+                            <span className="text-[11px] text-slate-500 font-mono italic">Chủ nhóm</span>
+                          ) : confirmDeleteId === user.id ? (
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                onClick={() => {
+                                  removeTeamMember(user.id);
+                                  setConfirmDeleteId(null);
+                                }}
+                                className="px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-500 text-white text-[11px] font-bold shadow-glow transition-all"
+                              >
+                                Xác nhận xóa
+                              </button>
+                              <button
+                                onClick={() => setConfirmDeleteId(null)}
+                                className="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-[11px] font-medium transition-colors"
+                              >
+                                Hủy
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setConfirmDeleteId(user.id)}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 hover:border-red-500/40 text-xs font-semibold transition-all focus:outline-none"
+                              title={`Xóa ${user.fullName} khỏi nhóm`}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              <span>Xóa</span>
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

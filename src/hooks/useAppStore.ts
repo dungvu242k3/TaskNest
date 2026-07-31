@@ -1,9 +1,10 @@
 import { create } from 'zustand';
-import { Note, NoteStatus, PriorityLevel, MemberPermission } from '../types';
-import { MOCK_NOTES, CURRENT_USER } from '../constants/mockData';
+import { Note, NoteStatus, PriorityLevel, MemberPermission, UserProfile } from '../types';
+import { MOCK_NOTES, MOCK_USERS, CURRENT_USER } from '../constants/mockData';
 
 interface AppState {
   notes: Note[];
+  teamMembers: UserProfile[];
   searchQuery: string;
   isCommandPaletteOpen: boolean;
   quickPeekNoteId: string | null;
@@ -14,7 +15,7 @@ interface AppState {
   toggleCommandPalette: () => void;
   setQuickPeekNoteId: (id: string | null) => void;
   
-  // Note Actions
+  // Note & Member Actions
   togglePinNote: (id: string) => void;
   updateNoteStatus: (id: string, status: NoteStatus) => void;
   updateNote: (id: string, updates: Partial<Pick<Note, 'title' | 'content' | 'isPrivate' | 'priority'>>) => void;
@@ -23,12 +24,14 @@ interface AppState {
   deleteChecklistItem: (noteId: string, checklistId: string) => void;
   updateChecklistItem: (noteId: string, checklistId: string, text: string) => void;
   updateMemberPermission: (noteId: string, userId: string, permission: MemberPermission) => void;
+  removeTeamMember: (userId: string) => void;
   addNote: (title: string, isPrivate: boolean, priority?: PriorityLevel) => Note;
   deleteNote: (id: string) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
   notes: MOCK_NOTES,
+  teamMembers: MOCK_USERS,
   searchQuery: '',
   isCommandPaletteOpen: false,
   quickPeekNoteId: null,
@@ -155,5 +158,14 @@ export const useAppStore = create<AppState>((set, get) => ({
             }
           : note
       ),
+    })),
+
+  removeTeamMember: (userId) =>
+    set((state) => ({
+      teamMembers: state.teamMembers.filter((u) => u.id !== userId),
+      notes: state.notes.map((note) => ({
+        ...note,
+        members: note.members.filter((m) => m.user.id !== userId),
+      })),
     })),
 }));
