@@ -6,7 +6,7 @@ import { CURRENT_USER } from '../../constants/mockData';
 
 export const Header: React.FC = () => {
   const navigate = useNavigate();
-  const { toggleCommandPalette } = useAppStore();
+  const { toggleCommandPalette, isLoggedIn, currentUser } = useAppStore();
 
   return (
     <header className="h-16 bg-surface/50 backdrop-blur-md border-b border-surface-border px-6 flex items-center justify-between sticky top-0 z-20">
@@ -32,7 +32,7 @@ export const Header: React.FC = () => {
         </button>
       </div>
 
-      {/* Right Header Actions: Notification Bell + Login Link + User Profile Avatar */}
+      {/* Right Header Actions: Notification Bell + Conditional Auth Button / User Profile Avatar */}
       <div className="flex items-center justify-end gap-3 w-48">
         {/* Notifications */}
         <button
@@ -44,29 +44,32 @@ export const Header: React.FC = () => {
           <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
         </button>
 
-        {/* Demo Login Page Link */}
-        <button
-          onClick={() => navigate('/login')}
-          title="Trang Đăng nhập / Đăng ký"
-          className="p-2 rounded-xl text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors focus:outline-none flex items-center gap-1.5 text-xs font-semibold"
-        >
-          <LogIn className="h-4 w-4" />
-          <span className="hidden sm:inline">Đăng nhập</span>
-        </button>
-
-        {/* User Profile Avatar Link */}
-        <button
-          onClick={() => navigate('/settings?tab=profile')}
-          aria-label="Hồ sơ cá nhân"
-          title="Xem hồ sơ cá nhân"
-          className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-surface-hover transition-colors focus:outline-none group"
-        >
-          <img
-            src={CURRENT_USER.avatarUrl}
-            alt={CURRENT_USER.fullName}
-            className="h-8 w-8 rounded-full object-cover ring-2 ring-indigo-500/40 group-hover:ring-indigo-400 transition-all"
-          />
-        </button>
+        {/* Conditional Rendering based on Authentication State */}
+        {!isLoggedIn ? (
+          /* Show ONLY Login Button when NOT Logged In */
+          <button
+            onClick={() => navigate('/login')}
+            title="Đăng nhập tài khoản"
+            className="py-2 px-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition-all focus:outline-none flex items-center gap-2 text-xs font-semibold shadow-glow border border-indigo-400/30"
+          >
+            <LogIn className="h-4 w-4" />
+            <span>Đăng nhập</span>
+          </button>
+        ) : (
+          /* Show ONLY User Avatar when Logged In */
+          <button
+            onClick={() => navigate('/settings?tab=profile')}
+            aria-label="Hồ sơ cá nhân"
+            title="Xem hồ sơ cá nhân"
+            className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-surface-hover transition-colors focus:outline-none group"
+          >
+            <img
+              src={currentUser?.avatarUrl || CURRENT_USER.avatarUrl}
+              alt={currentUser?.fullName || CURRENT_USER.fullName}
+              className="h-8 w-8 rounded-full object-cover ring-2 ring-indigo-500/40 group-hover:ring-indigo-400 transition-all"
+            />
+          </button>
+        )}
       </div>
     </header>
   );

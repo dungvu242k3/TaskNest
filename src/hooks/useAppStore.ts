@@ -21,12 +21,16 @@ interface AppState {
   quickPeekNoteId: string | null;
   isLoadingSupabase: boolean;
   dashboardMetrics: DashboardMetrics | null;
+  isLoggedIn: boolean;
+  currentUser: UserProfile | null;
 
   // Actions
   setSearchQuery: (query: string) => void;
   setCommandPaletteOpen: (isOpen: boolean) => void;
   toggleCommandPalette: () => void;
   setQuickPeekNoteId: (id: string | null) => void;
+  login: () => void;
+  logout: () => Promise<void>;
 
   // Supabase Backend Sync Actions
   fetchNotesFromSupabase: () => Promise<void>;
@@ -55,11 +59,22 @@ export const useAppStore = create<AppState>((set, get) => ({
   quickPeekNoteId: null,
   isLoadingSupabase: false,
   dashboardMetrics: null,
+  isLoggedIn: true,
+  currentUser: CURRENT_USER,
 
   setSearchQuery: (query) => set({ searchQuery: query }),
   setCommandPaletteOpen: (isOpen) => set({ isCommandPaletteOpen: isOpen }),
   toggleCommandPalette: () => set((state) => ({ isCommandPaletteOpen: !state.isCommandPaletteOpen })),
   setQuickPeekNoteId: (id) => set({ quickPeekNoteId: id }),
+  login: () => set({ isLoggedIn: true, currentUser: CURRENT_USER }),
+  logout: async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.warn('Supabase logout notice:', err);
+    }
+    set({ isLoggedIn: false, currentUser: null });
+  },
 
   // 1. Fetch Notes from Supabase DB
   fetchNotesFromSupabase: async () => {

@@ -13,9 +13,11 @@ import {
   Loader2,
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
+import { useAppStore } from '../hooks/useAppStore';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const { login } = useAppStore();
   const [isRegister, setIsRegister] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -84,6 +86,7 @@ export const LoginPage: React.FC = () => {
         });
         if (error) throw error;
       }
+      login();
       navigate('/');
     } catch (err: any) {
       console.warn('Supabase Auth Notice:', err.message || err);
@@ -95,6 +98,7 @@ export const LoginPage: React.FC = () => {
         setErrorMessage('Địa chỉ email này đã được đăng ký.');
       } else {
         // Safe fallback for demo mode
+        login();
         navigate('/');
       }
     } finally {
@@ -114,8 +118,10 @@ export const LoginPage: React.FC = () => {
         provider: 'google',
       });
       if (error) throw error;
+      login();
     } catch (err: any) {
       console.warn('Google Auth Notice:', err.message || err);
+      login();
       navigate('/');
     } finally {
       setLoading(false);
