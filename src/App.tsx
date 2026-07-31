@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Sidebar } from './components/common/Sidebar';
 import { Header } from './components/common/Header';
@@ -11,10 +11,19 @@ import { NoteDetailPage } from './pages/NoteDetailPage';
 import { TeamPage } from './pages/TeamPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { LoginPage } from './pages/LoginPage';
+import { useAppStore } from './hooks/useAppStore';
 
 export const App: React.FC = () => {
   const [isShareModalOpen, setShareModalOpen] = useState(false);
   const [isCreateNoteModalOpen, setCreateNoteModalOpen] = useState(false);
+  const { fetchNotesFromSupabase, subscribeToRealtimeNotes } = useAppStore();
+
+  // Global Supabase Realtime Subscription & Initial Fetch
+  useEffect(() => {
+    fetchNotesFromSupabase();
+    const unsubscribe = subscribeToRealtimeNotes();
+    return () => unsubscribe();
+  }, [fetchNotesFromSupabase, subscribeToRealtimeNotes]);
 
   return (
     <Router>
