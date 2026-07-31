@@ -89,9 +89,13 @@ export const LoginPage: React.FC = () => {
       login();
       navigate('/');
     } catch (err: any) {
-      console.warn('Supabase Auth Notice:', err.message || err);
+      console.warn('Supabase Auth Notice:', err?.message || err?.msg || err);
       // Safe error mapping avoiding info disclosure
-      const msg = err.message || '';
+      const msg =
+        err?.msg ||
+        err?.message ||
+        err?.error_description ||
+        (typeof err === 'object' ? JSON.stringify(err) : String(err));
       if (msg.includes('Invalid login credentials')) {
         setErrorMessage('Địa chỉ email hoặc mật khẩu không chính xác.');
       } else if (msg.includes('User already registered')) {
@@ -122,11 +126,25 @@ export const LoginPage: React.FC = () => {
       });
       if (error) throw error;
     } catch (err: any) {
-      console.warn('Google Auth Notice:', err.message || err);
-      const msg = err.message || JSON.stringify(err);
-      if (msg.includes('provider is not enabled') || msg.includes('Unsupported provider')) {
-        setErrorMessage('Dự án Supabase chưa bật Google OAuth Provider trong Auth Settings. Đang đăng nhập tài khoản Demo...');
+      console.warn('Google Auth Notice:', err?.message || err?.msg || err);
+      const errorStr =
+        err?.msg ||
+        err?.message ||
+        err?.error_description ||
+        (typeof err === 'object' ? JSON.stringify(err) : String(err));
+
+      if (
+        errorStr.includes('provider is not enabled') ||
+        errorStr.includes('Unsupported provider') ||
+        err?.error_code === 'validation_failed'
+      ) {
+        setErrorMessage(
+          'Dự án Supabase chưa bật Google OAuth Provider trong Auth Settings. Đang đăng nhập tài khoản Demo...'
+        );
+      } else {
+        setErrorMessage('Đã xảy ra lỗi khi kết nối Google OAuth. Đang đăng nhập tài khoản Demo...');
       }
+
       setTimeout(() => {
         login();
         navigate('/');
