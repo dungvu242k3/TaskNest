@@ -9,7 +9,7 @@ import {
   Lock,
   Share2,
   Trash2,
-  Sparkles,
+  Layers,
   ChevronDown,
   ChevronRight,
   FolderOpen,
@@ -39,8 +39,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateNoteModal }) => {
         {/* Brand Logo Header */}
         <div className="h-16 px-6 flex items-center justify-between border-b border-surface-border/50">
           <div className="flex items-center gap-2.5">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center shadow-glow">
-              <Sparkles className="h-5 w-5 text-white" />
+            <div className="h-9 w-9 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
+              <Layers className="h-5 w-5 text-indigo-400" />
             </div>
             <div>
               <h1 className="font-extrabold text-lg tracking-tight text-white leading-none">TaskNest</h1>

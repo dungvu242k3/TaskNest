@@ -172,7 +172,7 @@ export const CreateNoteModal: React.FC<CreateNoteModalProps> = ({ isOpen, onClos
               type="submit"
               className="flex items-center gap-1.5 py-2.5 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all"
             >
-              <Sparkles className="h-4 w-4" />
+              <Plus className="h-4 w-4" />
               <span>Tạo Ghi chú</span>
             </button>
           </div>

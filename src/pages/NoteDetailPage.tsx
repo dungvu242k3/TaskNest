@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Lock, Share2, UserPlus, Trash2, Sparkles } from 'lucide-react';
+import { ArrowLeft, Lock, Share2, UserPlus, Trash2, CheckCircle2 } from 'lucide-react';
 import { useAppStore } from '../hooks/useAppStore';
 import { PriorityBadge } from '../components/ui/PriorityBadge';
 import { AvatarStack } from '../components/ui/AvatarStack';
@@ -143,7 +143,7 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
 
           <div className="flex items-center gap-4 text-xs text-slate-400">
             <span className="flex items-center gap-1 text-emerald-400 font-mono text-[11px]">
-              <Sparkles className="h-3 w-3" /> {savedStatus}
+              <CheckCircle2 className="h-3.5 w-3.5" /> {savedStatus}
             </span>
             {!isPrivate && <AvatarStack members={note.members} />}
           </div>

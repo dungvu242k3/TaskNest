@@ -30,8 +30,9 @@ export default {
         mono: ['"JetBrains Mono"', 'monospace'],
       },
       boxShadow: {
-        glow: '0 0 20px -5px rgba(99, 102, 241, 0.3)',
-        'glow-amber': '0 0 20px -5px rgba(245, 158, 11, 0.3)',
+        glow: '0 4px 20px -2px rgba(99, 102, 241, 0.25)',
+        'glow-amber': '0 4px 20px -2px rgba(245, 158, 11, 0.25)',
+        card: '0 10px 30px -10px rgba(0, 0, 0, 0.5)',
       },
     },
   },

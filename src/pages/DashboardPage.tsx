@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Lock, Share2, CheckCircle2, TrendingUp, Sparkles, Clock, ArrowRight } from 'lucide-react';
+import { FileText, Lock, Share2, CheckCircle2, TrendingUp, LayoutDashboard, Clock, ArrowRight } from 'lucide-react';
 import { useAppStore } from '../hooks/useAppStore';
 import { PriorityBadge } from '../components/ui/PriorityBadge';
 import { AvatarStack } from '../components/ui/AvatarStack';
@@ -19,11 +19,18 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
-      {/* Welcome Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-900/40 via-surface to-surface border border-indigo-500/20 p-8">
+      {/* Welcome Banner with Custom Editorial Image */}
+      <div className="relative overflow-hidden rounded-3xl border border-surface-border p-8 min-h-[160px] flex items-center">
+        <img
+          src="/assets/workspace_banner.png"
+          alt="Workspace Banner"
+          className="absolute inset-0 w-full h-full object-cover object-center opacity-40 mix-blend-luminosity"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-transparent" />
+
         <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold mb-3">
-            <Sparkles className="h-3.5 w-3.5" /> Bảng Điều Khiển Không Gian Làm Việc
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold mb-3">
+            <LayoutDashboard className="h-3.5 w-3.5" /> Bảng Điều Khiển Không Gian Làm Việc
           </div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight leading-tight">
             Xin chào trở lại, Dũng Vũ 👋
