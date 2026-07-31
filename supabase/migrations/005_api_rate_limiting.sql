@@ -18,7 +18,7 @@ CREATE INDEX IF NOT EXISTS idx_rate_limits_user_action ON public.api_rate_limits
 CREATE OR REPLACE FUNCTION public.check_user_rate_limit(
     p_user_id UUID,
     p_action TEXT,
-    p_max_allowed INT DEFAULT 30, -- Max requests per window
+    p_max_allowed INT DEFAULT 5, -- Max 5 requests per window
     p_window_seconds INT DEFAULT 60 -- Window duration in seconds
 ) RETURNS BOOLEAN AS $$
 DECLARE

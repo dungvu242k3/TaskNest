@@ -27,9 +27,30 @@ export const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const checkLoginRateLimit = (): boolean => {
+    const now = Date.now();
+    const loginKey = 'tasknest_login_attempts';
+    const attempts: number[] = JSON.parse(localStorage.getItem(loginKey) || '[]')
+      .filter((ts: number) => now - ts < 60000);
+
+    if (attempts.length >= 5) {
+      setErrorMessage('Bảo mật: Bạn đã thử đăng nhập/đăng ký quá 5 lần trong 1 phút. Vui lòng chờ 60 giây trước khi thử lại.');
+      return false;
+    }
+
+    attempts.push(now);
+    localStorage.setItem(loginKey, JSON.stringify(attempts));
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+
+    // Rate Limit Guard: Max 5 attempts per 60 seconds
+    if (!checkLoginRateLimit()) {
+      return;
+    }
 
     const sanitizedEmail = email.trim().toLowerCase();
     const sanitizedFullName = fullName.trim();
@@ -82,8 +103,12 @@ export const LoginPage: React.FC = () => {
   };
 
   const handleGoogleLogin = async () => {
-    setLoading(true);
     setErrorMessage(null);
+    if (!checkLoginRateLimit()) {
+      return;
+    }
+
+    setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
