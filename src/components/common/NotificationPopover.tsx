@@ -99,10 +99,13 @@ export const NotificationPopover: React.FC = () => {
                       </div>
                       <div>
                         <h5 className="text-xs font-bold text-slate-100 leading-tight">
-                          Lời mời tham gia Không gian Nhóm
+                          {inv.noteId ? `Lời mời Ghi chú: "${inv.noteTitle || 'Ghi chú chung'}"` : 'Lời mời tham gia Không gian Nhóm'}
                         </h5>
-                        <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">
-                          Gửi tới: <span className="text-indigo-300 font-semibold">{inv.email}</span>
+                        <p className="text-[11px] text-slate-400 mt-0.5 leading-tight flex items-center gap-2">
+                          <span>Gửi tới: <strong className="text-indigo-300 font-semibold">{inv.email}</strong></span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">
+                            Hạn: 7 ngày
+                          </span>
                         </p>
                       </div>
                     </div>
