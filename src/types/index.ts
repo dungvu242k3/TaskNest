@@ -70,3 +70,14 @@ export interface Team {
   updatedAt: string;
 }
 
+export interface TeamInvitation {
+  id: string;
+  teamId?: string;
+  email: string;
+  invitedBy: UserProfile;
+  permission: MemberPermission;
+  status: 'pending' | 'accepted' | 'canceled';
+  createdAt: string;
+}
+
+

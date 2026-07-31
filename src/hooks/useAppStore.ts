@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { Note, NoteStatus, PriorityLevel, MemberPermission, UserProfile, Team } from '../types';
+import { Note, NoteStatus, PriorityLevel, MemberPermission, UserProfile, Team, TeamInvitation } from '../types';
 import { MOCK_NOTES, MOCK_USERS, CURRENT_USER } from '../constants/mockData';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 
@@ -18,6 +18,7 @@ interface AppState {
   notes: Note[];
   teamMembers: UserProfile[];
   teams: Team[];
+  invitations: TeamInvitation[];
   activeTeamId: string | null;
   searchQuery: string;
   isCommandPaletteOpen: boolean;
@@ -43,6 +44,10 @@ interface AppState {
   fetchTeamsFromSupabase: () => Promise<void>;
   createTeamInSupabase: (name: string, description?: string) => Promise<Team | null>;
   setActiveTeamId: (teamId: string | null) => void;
+  fetchInvitationsFromSupabase: () => Promise<void>;
+  sendInvitationInSupabase: (email: string, permission?: MemberPermission, teamId?: string) => Promise<boolean>;
+  acceptInvitationInSupabase: (invitationId: string) => Promise<void>;
+  cancelInvitationInSupabase: (invitationId: string) => Promise<void>;
   fetchDashboardMetricsFromSupabase: (userId?: string) => Promise<DashboardMetrics | null>;
   subscribeToRealtimeNotes: () => () => void;
 
@@ -66,6 +71,7 @@ export const useAppStore = create<AppState>()(
   notes: [],
   teamMembers: [],
   teams: [],
+  invitations: [],
   activeTeamId: null,
   searchQuery: '',
   isCommandPaletteOpen: false,
@@ -88,7 +94,7 @@ export const useAppStore = create<AppState>()(
     } catch (err) {
       console.warn('Supabase logout notice:', err);
     }
-    set({ isLoggedIn: false, currentUser: null, teams: [], activeTeamId: null });
+    set({ isLoggedIn: false, currentUser: null, teams: [], invitations: [], activeTeamId: null });
   },
   updateUserProfile: (updates) =>
     set((state) => ({
@@ -119,6 +125,7 @@ export const useAppStore = create<AppState>()(
         get().fetchNotesFromSupabase();
         get().fetchProfilesFromSupabase();
         get().fetchTeamsFromSupabase();
+        get().fetchInvitationsFromSupabase();
       } else {
         set({ isLoggedIn: false, currentUser: null });
       }
@@ -137,6 +144,7 @@ export const useAppStore = create<AppState>()(
           get().fetchNotesFromSupabase();
           get().fetchProfilesFromSupabase();
           get().fetchTeamsFromSupabase();
+          get().fetchInvitationsFromSupabase();
         } else {
           set({ isLoggedIn: false, currentUser: null });
         }
@@ -314,6 +322,119 @@ export const useAppStore = create<AppState>()(
   },
 
   setActiveTeamId: (teamId) => set({ activeTeamId: teamId }),
+
+  // 1e. Fetch Invitations from Supabase DB
+  fetchInvitationsFromSupabase: async () => {
+    if (!isSupabaseConfigured) return;
+    try {
+      const { data, error } = await supabase
+        .from('team_invitations')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      if (data) {
+        const mapped: TeamInvitation[] = data.map((item: any) => ({
+          id: item.id,
+          teamId: item.team_id || undefined,
+          email: item.email,
+          invitedBy: get().currentUser || CURRENT_USER,
+          permission: item.permission || 'edit',
+          status: item.status || 'pending',
+          createdAt: item.created_at || new Date().toISOString(),
+        }));
+        set({ invitations: mapped });
+      }
+    } catch (err) {
+      console.warn('Supabase fetch invitations notice:', err);
+    }
+  },
+
+  // 1f. Send Invitation in Supabase DB
+  sendInvitationInSupabase: async (email, permission = 'edit', teamId) => {
+    const sanitizedEmail = email.trim().toLowerCase();
+    if (!sanitizedEmail) return false;
+
+    const newInvite: TeamInvitation = {
+      id: `inv-${Date.now()}`,
+      teamId: teamId || get().activeTeamId || undefined,
+      email: sanitizedEmail,
+      invitedBy: get().currentUser || CURRENT_USER,
+      permission,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+    };
+
+    set((state) => ({
+      invitations: [newInvite, ...state.invitations],
+    }));
+
+    if (isSupabaseConfigured && get().currentUser?.id) {
+      try {
+        const { data, error } = await supabase
+          .from('team_invitations')
+          .insert({
+            email: sanitizedEmail,
+            permission,
+            team_id: teamId || get().activeTeamId || null,
+            invited_by: get().currentUser?.id,
+            status: 'pending',
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        if (data) {
+          set((state) => ({
+            invitations: state.invitations.map((i) =>
+              i.id === newInvite.id ? { ...i, id: data.id } : i
+            ),
+          }));
+        }
+      } catch (err) {
+        console.warn('Supabase send invitation notice:', err);
+      }
+    }
+    return true;
+  },
+
+  // 1g. Accept Invitation
+  acceptInvitationInSupabase: async (invitationId) => {
+    set((state) => ({
+      invitations: state.invitations.map((i) =>
+        i.id === invitationId ? { ...i, status: 'accepted' } : i
+      ),
+    }));
+
+    if (isSupabaseConfigured) {
+      try {
+        await supabase
+          .from('team_invitations')
+          .update({ status: 'accepted' })
+          .eq('id', invitationId);
+      } catch (err) {
+        console.warn('Supabase accept invitation notice:', err);
+      }
+    }
+  },
+
+  // 1h. Cancel / Revoke Invitation
+  cancelInvitationInSupabase: async (invitationId) => {
+    set((state) => ({
+      invitations: state.invitations.filter((i) => i.id !== invitationId),
+    }));
+
+    if (isSupabaseConfigured) {
+      try {
+        await supabase
+          .from('team_invitations')
+          .delete()
+          .eq('id', invitationId);
+      } catch (err) {
+        console.warn('Supabase cancel invitation notice:', err);
+      }
+    }
+  },
 
   // 2. Fetch Dashboard Analytics Metrics via Supabase RPC Stored Function
   fetchDashboardMetricsFromSupabase: async (userId) => {

@@ -13,15 +13,20 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteTit
   const [email, setEmail] = useState('');
   const [permission, setPermission] = useState<MemberPermission>('edit');
   const [copied, setCopied] = useState(false);
-  const { teamMembers, currentUser } = useAppStore();
+  const [invitedSuccessEmail, setInvitedSuccessEmail] = useState<string | null>(null);
+  const { teamMembers, currentUser, sendInvitationInSupabase } = useAppStore();
 
   if (!isOpen) return null;
 
-  const handleSendInvite = (e: React.FormEvent) => {
+  const handleSendInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
-    alert(`Đã gửi lời mời tới ${email} với quyền ${permission === 'edit' ? 'Chỉnh sửa' : 'Xem'}!`);
+
+    const targetEmail = email.trim();
+    await sendInvitationInSupabase(targetEmail, permission);
+    setInvitedSuccessEmail(targetEmail);
     setEmail('');
+    setTimeout(() => setInvitedSuccessEmail(null), 4000);
   };
 
   const handleCopyLink = () => {
@@ -93,6 +98,12 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteTit
                 Gửi lời mời
               </button>
             </div>
+            {invitedSuccessEmail && (
+              <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2 font-medium animate-in fade-in">
+                <Check className="h-4 w-4 text-emerald-400 shrink-0" />
+                <span>Đã gửi thành công lời mời tham gia tới <strong>{invitedSuccessEmail}</strong>!</span>
+              </div>
+            )}
           </form>
 
           {/* Members List */}

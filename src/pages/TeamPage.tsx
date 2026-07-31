@@ -30,7 +30,21 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] = useState(false);
 
-  const { teamMembers, teams, activeTeamId, setActiveTeamId, notes, currentUser, removeTeamMember } = useAppStore();
+  const {
+    teamMembers,
+    teams,
+    invitations,
+    activeTeamId,
+    setActiveTeamId,
+    notes,
+    currentUser,
+    removeTeamMember,
+    acceptInvitationInSupabase,
+    cancelInvitationInSupabase,
+    sendInvitationInSupabase,
+  } = useAppStore();
+
+  const pendingInvites = invitations.filter((i) => i.status === 'pending');
 
   const handleTabChange = (tab: string) => {
     setSearchParams({ tab });
@@ -174,7 +188,7 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
                   Lời mời đang chờ
                 </span>
                 <div className="text-3xl font-extrabold text-amber-400 mt-1.5 font-mono">
-                  0
+                  {pendingInvites.length}
                 </div>
                 <p className="text-[11px] text-slate-400 mt-1">Đang chờ phản hồi</p>
               </div>
@@ -227,8 +241,8 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
               >
                 <Mail className="h-4 w-4 text-amber-400" />
                 <span>Lời mời đang chờ</span>
-                <span className="ml-1 px-1.5 py-0.5 rounded-lg bg-slate-800 text-slate-300 text-[10px] font-mono">
-                  0
+                <span className="ml-1 px-1.5 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 text-[10px] font-mono border border-amber-500/30 font-bold">
+                  {pendingInvites.length}
                 </span>
               </button>
 
@@ -393,14 +407,68 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
                   <span>Danh sách lời mời đang chờ xử lý</span>
                 </h3>
                 <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 font-mono">
-                  0 Lời mời
+                  {pendingInvites.length} Lời mời
                 </span>
               </div>
 
-              <div className="p-8 rounded-2xl bg-background/40 border border-surface-border/50 text-center space-y-2 text-slate-400">
-                <Mail className="h-8 w-8 text-slate-600 mx-auto" />
-                <p className="text-xs">Hiện tại không có lời mời nào đang chờ phản hồi.</p>
-              </div>
+              {pendingInvites.length === 0 ? (
+                <div className="p-8 rounded-2xl bg-background/40 border border-surface-border/50 text-center space-y-2 text-slate-400">
+                  <Mail className="h-8 w-8 text-slate-600 mx-auto" />
+                  <p className="text-xs">Hiện tại không có lời mời nào đang chờ phản hồi.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {pendingInvites.map((invite) => (
+                    <div
+                      key={invite.id}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-background/50 border border-surface-border/50 hover:border-amber-500/40 transition-colors gap-4"
+                    >
+                      <div className="flex items-center gap-3.5">
+                        <div className="p-2.5 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0">
+                          <Mail className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-white text-sm">{invite.email}</span>
+                            <span className="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-semibold">
+                              Quyền {invite.permission === 'edit' ? 'Chỉnh sửa' : 'Xem'}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-400 mt-0.5">
+                            Đã gửi lúc {new Date(invite.createdAt).toLocaleString('vi-VN')} bởi {invite.invitedBy.fullName || 'Chủ nhóm'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 self-end sm:self-auto">
+                        <button
+                          onClick={() => acceptInvitationInSupabase(invite.id)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-glow transition-all"
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          <span>Chấp nhận</span>
+                        </button>
+
+                        <button
+                          onClick={() => sendInvitationInSupabase(invite.email, invite.permission)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-hover hover:bg-surface-border text-slate-200 text-xs font-semibold border border-surface-border transition-all"
+                        >
+                          <RotateCw className="h-3.5 w-3.5 text-amber-400" />
+                          <span>Gửi lại</span>
+                        </button>
+
+                        <button
+                          onClick={() => cancelInvitationInSupabase(invite.id)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 hover:border-red-500/40 text-xs font-semibold transition-all"
+                        >
+                          <XCircle className="h-3.5 w-3.5" />
+                          <span>Thu hồi / Hủy</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
