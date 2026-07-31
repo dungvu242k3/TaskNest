@@ -214,21 +214,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateNoteModal }) => {
           </NavLink>
         </nav>
       </div>
-
-      {/* User Footer Profile */}
-      <div className="p-4 border-t border-surface-border">
-        <div className="flex items-center gap-3">
-          <img
-            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
-            alt="Dũng Vũ"
-            className="h-9 w-9 rounded-full object-cover ring-2 ring-indigo-500/50"
-          />
-          <div className="overflow-hidden">
-            <h4 className="text-xs font-semibold text-slate-200 truncate leading-tight">Dũng Vũ</h4>
-            <p className="text-[10px] text-slate-400 truncate">dung.vu@tasknest.io</p>
-          </div>
-        </div>
-      </div>
     </aside>
   );
 };

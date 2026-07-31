@@ -1,19 +1,18 @@
 import React from 'react';
-import { Search, Command, Bell, UserPlus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Command, Bell } from 'lucide-react';
 import { useAppStore } from '../../hooks/useAppStore';
+import { CURRENT_USER } from '../../constants/mockData';
 
-interface HeaderProps {
-  onOpenShareModal?: () => void;
-}
-
-export const Header: React.FC<HeaderProps> = ({ onOpenShareModal }) => {
+export const Header: React.FC = () => {
+  const navigate = useNavigate();
   const { toggleCommandPalette } = useAppStore();
 
   return (
     <header className="h-16 bg-surface/50 backdrop-blur-md border-b border-surface-border px-6 flex items-center justify-between sticky top-0 z-20">
-      {/* Left Placeholder / Breadcrumb Area */}
+      {/* Left Placeholder Area */}
       <div className="hidden md:flex items-center gap-2 text-xs text-slate-400 font-medium w-48">
-        {/* Placeholder to balance centered search bar */}
+        {/* Placeholder to keep search bar perfectly centered */}
       </div>
 
       {/* Centered Search Bar / Command Palette Trigger */}
@@ -33,25 +32,30 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShareModal }) => {
         </button>
       </div>
 
-      {/* Right Header Actions */}
+      {/* Right Header Actions: Notification Bell + User Profile Avatar */}
       <div className="flex items-center justify-end gap-3 w-48">
-        {onOpenShareModal && (
-          <button
-            onClick={onOpenShareModal}
-            className="flex items-center gap-2 py-2 px-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all focus:outline-none"
-          >
-            <UserPlus className="h-4 w-4" />
-            <span>Mời thành viên</span>
-          </button>
-        )}
-
         {/* Notifications */}
         <button
           aria-label="Thông báo"
+          title="Thông báo hệ thống"
           className="relative p-2 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-surface-hover transition-colors focus:outline-none"
         >
           <Bell className="h-5 w-5" />
           <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
+        </button>
+
+        {/* User Profile Avatar Link */}
+        <button
+          onClick={() => navigate('/settings?tab=profile')}
+          aria-label="Hồ sơ cá nhân"
+          title="Xem hồ sơ cá nhân"
+          className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-surface-hover transition-colors focus:outline-none group"
+        >
+          <img
+            src={CURRENT_USER.avatarUrl}
+            alt={CURRENT_USER.fullName}
+            className="h-8 w-8 rounded-full object-cover ring-2 ring-indigo-500/40 group-hover:ring-indigo-400 transition-all"
+          />
         </button>
       </div>
     </header>

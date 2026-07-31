@@ -25,7 +25,7 @@ export const App: React.FC = () => {
         {/* Main Application Container */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Top Sticky Header */}
-          <Header onOpenShareModal={() => setShareModalOpen(true)} />
+          <Header />
 
           {/* Main Page Body View */}
           <main className="flex-1 overflow-y-auto">
