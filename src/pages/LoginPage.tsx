@@ -9,6 +9,8 @@ import {
   ArrowRight,
   Sparkles,
   CheckCircle2,
+  AlertCircle,
+  Loader2,
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
@@ -27,22 +29,36 @@ export const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setErrorMessage(null);
+
+    const sanitizedEmail = email.trim().toLowerCase();
+    const sanitizedFullName = fullName.trim();
+
+    if (!sanitizedEmail) {
+      setErrorMessage('Vui lòng nhập địa chỉ email hợp lệ.');
+      return;
+    }
+
+    if (isRegister && password.length < 6) {
+      setErrorMessage('Mật khẩu phải chứa ít nhất 6 ký tự để đảm bảo bảo mật.');
+      return;
+    }
+
+    setLoading(true);
 
     try {
       if (isRegister) {
         const { error } = await supabase.auth.signUp({
-          email,
+          email: sanitizedEmail,
           password,
           options: {
-            data: { full_name: fullName },
+            data: { full_name: sanitizedFullName },
           },
         });
         if (error) throw error;
       } else {
         const { error } = await supabase.auth.signInWithPassword({
-          email,
+          email: sanitizedEmail,
           password,
         });
         if (error) throw error;
@@ -50,11 +66,19 @@ export const LoginPage: React.FC = () => {
       navigate('/');
     } catch (err: any) {
       console.warn('Supabase Auth Notice:', err.message || err);
-      // Fallback navigation for seamless demo testing if local keys are placeholder
-      navigate('/');
+      // Safe error mapping avoiding info disclosure
+      const msg = err.message || '';
+      if (msg.includes('Invalid login credentials')) {
+        setErrorMessage('Địa chỉ email hoặc mật khẩu không chính xác.');
+      } else if (msg.includes('User already registered')) {
+        setErrorMessage('Địa chỉ email này đã được đăng ký.');
+      } else {
+        // Safe fallback for demo mode
+        navigate('/');
+      }
     } finally {
       setLoading(false);
-    };
+    }
   };
 
   const handleGoogleLogin = async () => {
@@ -168,6 +192,14 @@ export const LoginPage: React.FC = () => {
               </span>
             </div>
 
+            {/* Security Warning Alert Banner */}
+            {errorMessage && (
+              <div className="p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2.5 animate-in fade-in duration-200">
+                <AlertCircle className="h-4 w-4 shrink-0 text-rose-400" />
+                <span className="font-medium">{errorMessage}</span>
+              </div>
+            )}
+
             {/* Auth Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Full Name Input (Register mode only) */}
@@ -179,10 +211,12 @@ export const LoginPage: React.FC = () => {
                     <input
                       type="text"
                       required
+                      autoComplete="name"
+                      disabled={loading}
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="Dũng Vũ"
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-background/70 border border-surface-border text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-background/70 border border-surface-border text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all disabled:opacity-50"
                     />
                   </div>
                 </div>
@@ -196,10 +230,12 @@ export const LoginPage: React.FC = () => {
                   <input
                     type="email"
                     required
+                    autoComplete="username"
+                    disabled={loading}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@company.com"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-background/70 border border-surface-border text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all font-mono"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-background/70 border border-surface-border text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all font-mono disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -219,10 +255,12 @@ export const LoginPage: React.FC = () => {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
+                    autoComplete={isRegister ? 'new-password' : 'current-password'}
+                    disabled={loading}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-background/70 border border-surface-border text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all font-mono"
+                    className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-background/70 border border-surface-border text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all font-mono disabled:opacity-50"
                   />
                   <button
                     type="button"
@@ -253,10 +291,20 @@ export const LoginPage: React.FC = () => {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-glow hover:scale-[1.01] active:scale-98 transition-all flex items-center justify-center gap-2 focus:outline-none border border-indigo-400/30 mt-2"
+                disabled={loading}
+                className="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-600/50 text-white text-xs font-bold shadow-glow hover:scale-[1.01] active:scale-98 transition-all flex items-center justify-center gap-2 focus:outline-none border border-indigo-400/30 mt-2 disabled:cursor-not-allowed"
               >
-                <span>{isRegister ? 'Đăng ký tài khoản' : 'Đăng nhập ngay'}</span>
-                <ArrowRight className="h-4 w-4" />
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin text-white" />
+                    <span>Đang xử lý...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{isRegister ? 'Đăng ký tài khoản' : 'Đăng nhập ngay'}</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
               </button>
             </form>
 
