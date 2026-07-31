@@ -158,23 +158,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateNoteModal }) => {
                   </div>
                   <span className="text-[10px] text-indigo-400/80 font-mono">{sharedCount}</span>
                 </NavLink>
-
-                {/* Child 4: Thùng rác */}
-                <NavLink
-                  to="/notes?tab=trash"
-                  className={() =>
-                    `flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium border border-transparent transition-colors focus:outline-none ${
-                      isNotesActive && currentTab === 'trash'
-                        ? 'bg-slate-800 text-slate-200 font-semibold border-slate-700'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-surface-hover'
-                    }`
-                  }
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Trash2 className="h-3.5 w-3.5 text-slate-400" />
-                    <span>Thùng rác</span>
-                  </div>
-                </NavLink>
               </div>
             )}
           </div>

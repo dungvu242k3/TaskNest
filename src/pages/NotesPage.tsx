@@ -9,6 +9,9 @@ import {
   Pin,
   Plus,
   Search,
+  CheckSquare,
+  Clock,
+  Sparkles,
 } from 'lucide-react';
 import { useAppStore } from '../hooks/useAppStore';
 import { PriorityBadge } from '../components/ui/PriorityBadge';
@@ -35,8 +38,6 @@ export const NotesPage: React.FC<NotesPageProps> = ({
     filteredNotes = notes.filter((n) => n.isPrivate);
   } else if (currentTab === 'shared') {
     filteredNotes = notes.filter((n) => !n.isPrivate);
-  } else if (currentTab === 'trash') {
-    filteredNotes = [];
   }
 
   if (filterPriority !== 'all') {
@@ -64,34 +65,37 @@ export const NotesPage: React.FC<NotesPageProps> = ({
   };
 
   return (
-    <div className="p-6 sm:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-6 sm:p-10 max-w-7xl mx-auto space-y-8 min-h-[calc(100vh-4rem)]">
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-surface-border/40 pb-6">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold mb-2">
+            <Sparkles className="h-3.5 w-3.5" /> Khung làm việc Ghi chú
+          </div>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight">
             Quản lý Ghi chú Công việc
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Tổ chức kho ghi chú cá nhân & hợp tác công việc cùng nhóm hiệu quả.
+            Tổ chức kho ghi chú cá nhân & hợp tác công việc cùng nhóm hiệu quả ({filteredNotes.length} bài sẵn sàng).
           </p>
         </div>
 
         <button
           onClick={onOpenCreateNoteModal}
-          className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all"
+          className="inline-flex items-center justify-center gap-2 py-3 px-5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-glow hover:scale-[1.02] active:scale-95 transition-all duration-200 shrink-0 border border-indigo-400/30"
         >
           <Plus className="h-4 w-4" />
           <span>Tạo Ghi chú mới</span>
         </button>
       </div>
 
-      {/* Tabs Bar & Filters */}
-      <div className="glass-panel p-3 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 border border-surface-border/60 bg-surface/30">
+      {/* Control Toolbar */}
+      <div className="glass-panel p-2.5 sm:p-3 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 border border-surface-border/70 bg-surface/40 backdrop-blur-xl shadow-xl">
         {/* Navigation Tabs */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
           <button
             onClick={() => handleTabChange('all')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
               currentTab === 'all'
                 ? 'bg-indigo-600 text-white shadow-glow'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-surface-hover'
@@ -106,7 +110,7 @@ export const NotesPage: React.FC<NotesPageProps> = ({
 
           <button
             onClick={() => handleTabChange('private')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
               currentTab === 'private'
                 ? 'bg-amber-600 text-white shadow-glow-amber'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-surface-hover'
@@ -121,7 +125,7 @@ export const NotesPage: React.FC<NotesPageProps> = ({
 
           <button
             onClick={() => handleTabChange('shared')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
               currentTab === 'shared'
                 ? 'bg-indigo-600 text-white shadow-glow'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-surface-hover'
@@ -133,34 +137,22 @@ export const NotesPage: React.FC<NotesPageProps> = ({
               {notes.filter((n) => !n.isPrivate).length}
             </span>
           </button>
-
-          <button
-            onClick={() => handleTabChange('trash')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
-              currentTab === 'trash'
-                ? 'bg-slate-700 text-white'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-surface-hover'
-            }`}
-          >
-            <Trash2 className="h-4 w-4" />
-            <span>Thùng rác</span>
-          </button>
         </div>
 
-        {/* Priority Filter & Search Input */}
+        {/* Search & Priority Filter */}
         <div className="flex items-center gap-2">
-          <div className="relative flex-1 sm:w-52">
+          <div className="relative flex-1 sm:w-56">
             <Search className="h-3.5 w-3.5 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
               placeholder="Lọc danh sách ghi chú..."
-              className="w-full pl-8 pr-3 py-2 rounded-xl bg-background/60 border border-surface-border text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-background/70 border border-surface-border/70 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/30 transition-all"
             />
           </div>
 
-          <div className="flex items-center gap-1.5 bg-background/60 px-3 py-2 rounded-xl border border-surface-border shrink-0">
+          <div className="flex items-center gap-1.5 bg-background/70 px-3 py-2 rounded-xl border border-surface-border/70 shrink-0">
             <Filter className="h-3.5 w-3.5 text-slate-400" />
             <select
               value={filterPriority}
@@ -176,79 +168,106 @@ export const NotesPage: React.FC<NotesPageProps> = ({
         </div>
       </div>
 
-      {/* Notes Grid */}
+      {/* Bento Notes Grid */}
       {filteredNotes.length === 0 ? (
-        <div className="glass-panel p-12 text-center rounded-3xl space-y-3 border border-surface-border/60 bg-surface/30">
-          <div className="h-12 w-12 rounded-2xl bg-slate-800 text-slate-400 flex items-center justify-center mx-auto">
-            <FileText className="h-6 w-6" />
+        <div className="glass-panel p-12 text-center rounded-3xl space-y-4 border border-surface-border/60 bg-surface/30 backdrop-blur-xl">
+          <div className="h-14 w-14 rounded-3xl bg-slate-800 text-indigo-400 flex items-center justify-center mx-auto shadow-inner">
+            <FileText className="h-7 w-7" />
           </div>
-          <h3 className="text-base font-bold text-white">Không tìm thấy Ghi chú</h3>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto">
+          <h3 className="text-lg font-bold text-white">Không tìm thấy Ghi chú</h3>
+          <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
             Không có ghi chú nào phù hợp với bộ lọc tìm kiếm hiện tại. Hãy tạo ghi chú mới ngay!
           </p>
           <button
             onClick={onOpenCreateNoteModal}
-            className="py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all"
+            className="py-2.5 px-5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all"
           >
             Tạo Ghi chú mới
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredNotes.map((note) => (
-            <div
-              key={note.id}
-              onClick={() => navigate(`/notes/${note.id}`)}
-              className="glass-panel glass-panel-hover p-5 rounded-2xl cursor-pointer flex flex-col justify-between group relative border border-surface-border/60 bg-surface/30 hover:border-indigo-500/40 transition-all duration-200"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span
-                    className={`flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-lg ${
-                      note.isPrivate
-                        ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
-                        : 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/30'
-                    }`}
-                  >
-                    {note.isPrivate ? <Lock className="h-3 w-3" /> : <Share2 className="h-3 w-3" />}
-                    {note.isPrivate ? 'Riêng tư' : 'Ghi chú chung'}
-                  </span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredNotes.map((note) => {
+            const completedCount = note.checklist.filter((c) => c.completed).length;
+            const totalCount = note.checklist.length;
+            const percent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
-                  <div className="flex items-center gap-2">
-                    <PriorityBadge priority={note.priority} />
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        togglePinNote(note.id);
-                      }}
-                      className={`p-1.5 rounded-lg transition-colors ${
-                        note.pinned ? 'text-amber-400 bg-amber-500/10' : 'text-slate-600 hover:text-slate-300'
+            return (
+              <div
+                key={note.id}
+                onClick={() => navigate(`/notes/${note.id}`)}
+                className="glass-panel p-6 rounded-3xl border border-surface-border/60 bg-surface/30 hover:bg-surface-hover/60 hover:border-indigo-500/40 hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-300 ease-out group cursor-pointer flex flex-col justify-between relative overflow-hidden"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-3.5">
+                    <span
+                      className={`flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-xl border transition-colors ${
+                        note.isPrivate
+                          ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+                          : 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30'
                       }`}
                     >
-                      <Pin className="h-3.5 w-3.5" />
-                    </button>
+                      {note.isPrivate ? <Lock className="h-3 w-3" /> : <Share2 className="h-3 w-3" />}
+                      {note.isPrivate ? 'Riêng tư' : 'Ghi chú chung'}
+                    </span>
+
+                    <div className="flex items-center gap-2">
+                      <PriorityBadge priority={note.priority} />
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          togglePinNote(note.id);
+                        }}
+                        className={`p-1.5 rounded-xl transition-all duration-200 ${
+                          note.pinned
+                            ? 'text-amber-400 bg-amber-500/15 border border-amber-500/30'
+                            : 'text-slate-600 hover:text-slate-300 border border-transparent'
+                        }`}
+                        title={note.pinned ? 'Bỏ ghim' : 'Ghim bài'}
+                      >
+                        <Pin className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
+
+                  <h3 className="text-base font-bold text-white group-hover:text-indigo-300 transition-colors line-clamp-1 tracking-tight">
+                    {note.title || 'Ghi chú chưa đặt tên'}
+                  </h3>
+                  <p className="text-xs text-slate-300/80 mt-2 line-clamp-3 leading-relaxed font-normal">
+                    {note.content || 'Chưa có nội dung ghi chú.'}
+                  </p>
+
+                  {/* Checklist Mini Progress Bar */}
+                  {totalCount > 0 && (
+                    <div className="mt-4 pt-3 border-t border-surface-border/40 space-y-1.5">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-slate-400 flex items-center gap-1.5">
+                          <CheckSquare className="h-3.5 w-3.5 text-indigo-400" />
+                          <span>Checklist ({completedCount}/{totalCount})</span>
+                        </span>
+                        <span className="font-mono font-semibold text-indigo-400">{percent}%</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden border border-slate-700/50">
+                        <div
+                          className="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-300"
+                          style={{ width: `${percent}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                <h3 className="text-base font-bold text-slate-100 group-hover:text-indigo-300 transition-colors line-clamp-1">
-                  {note.title || 'Ghi chú chưa đặt tên'}
-                </h3>
-                <p className="text-xs text-slate-400 mt-2 line-clamp-3 leading-relaxed">
-                  {note.content || 'Chưa có nội dung ghi chú.'}
-                </p>
+                {/* Card Footer */}
+                <div className="mt-5 pt-3.5 border-t border-surface-border/40 flex items-center justify-between text-xs text-slate-400">
+                  <span className="text-[11px] text-slate-400 font-mono flex items-center gap-1.5">
+                    <Clock className="h-3.5 w-3.5 text-slate-500" />
+                    <span>{new Date(note.updatedAt).toLocaleDateString('vi-VN')}</span>
+                  </span>
+                  {!note.isPrivate && <AvatarStack members={note.members} />}
+                </div>
               </div>
-
-              {/* Card Footer */}
-              <div className="mt-5 pt-3 border-t border-surface-border/50 flex items-center justify-between text-xs text-slate-400">
-                <span className="text-[11px] text-slate-400 font-mono">
-                  {note.checklist.length > 0
-                    ? `${note.checklist.filter((c) => c.completed).length}/${note.checklist.length} Công việc`
-                    : new Date(note.updatedAt).toLocaleDateString('vi-VN')}
-                </span>
-                {!note.isPrivate && <AvatarStack members={note.members} />}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
