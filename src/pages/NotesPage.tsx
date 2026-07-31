@@ -8,6 +8,7 @@ import {
   Filter,
   Pin,
   Plus,
+  UserPlus,
   Search,
   CheckSquare,
   Clock,
@@ -25,6 +26,7 @@ interface NotesPageProps {
 
 export const NotesPage: React.FC<NotesPageProps> = ({
   onOpenCreateNoteModal,
+  onOpenShareModal,
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -236,6 +238,19 @@ export const NotesPage: React.FC<NotesPageProps> = ({
                       >
                         <Pin className="h-3.5 w-3.5" />
                       </button>
+
+                      {onOpenShareModal && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenShareModal(note.id);
+                          }}
+                          className="p-1.5 rounded-xl text-slate-500 hover:text-indigo-400 hover:bg-indigo-500/15 hover:border-indigo-500/30 border border-transparent transition-all duration-200"
+                          title="Chia sẻ ghi chú này"
+                        >
+                          <UserPlus className="h-3.5 w-3.5" />
+                        </button>
+                      )}
 
                       {isOwner && (
                         <button

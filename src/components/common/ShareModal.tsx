@@ -16,12 +16,19 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteId,
   const [permission, setPermission] = useState<MemberPermission>('edit');
   const [copied, setCopied] = useState(false);
   const [invitedSuccessEmail, setInvitedSuccessEmail] = useState<string | null>(null);
-  const { teamMembers, currentUser, invitations, sendInvitationInSupabase, cancelInvitationInSupabase } = useAppStore();
+  const { notes, teamMembers, currentUser, invitations, sendInvitationInSupabase, cancelInvitationInSupabase } = useAppStore();
+  const activeNote = notes.find((n) => n.id === noteId);
 
   if (!isOpen) return null;
 
   const pendingInvites = invitations.filter((i) => i.status === 'pending' && (!noteId || i.noteId === noteId));
-  const displayMembers = teamMembers.length > 0 ? teamMembers : currentUser ? [currentUser] : [];
+  const displayMembers = activeNote?.members?.length
+    ? activeNote.members.map((m) => m.user)
+    : teamMembers.length > 0
+    ? teamMembers
+    : currentUser
+    ? [currentUser]
+    : [];
 
   const handleSendInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,8 +66,12 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteId,
               <UserPlus className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white leading-tight">Chia sẻ Ghi chú Công việc</h3>
-              <p className="text-xs text-slate-400">{noteTitle || 'Mời thành viên vào không gian làm việc'}</p>
+              <h3 className="text-base font-bold text-white leading-tight">
+                {noteId ? 'Chia sẻ Ghi chú Chung' : 'Chia sẻ Không gian Làm việc'}
+              </h3>
+              <p className="text-xs text-slate-400">
+                {activeNote?.title ? `Ghi chú: "${activeNote.title}"` : noteTitle || 'Mời thành viên cùng tham gia'}
+              </p>
             </div>
           </div>
           <button
