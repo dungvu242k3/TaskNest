@@ -11,6 +11,7 @@ import { NoteDetailPage } from './pages/NoteDetailPage';
 import { TeamPage } from './pages/TeamPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { LoginPage } from './pages/LoginPage';
+import { RequireAuth } from './components/common/RequireAuth';
 import { useAppStore } from './hooks/useAppStore';
 
 export const App: React.FC = () => {
@@ -32,55 +33,57 @@ export const App: React.FC = () => {
         {/* Standalone Auth Route (No Sidebar) */}
         <Route path="/login" element={<LoginPage />} />
 
-        {/* Main Application Workspace Layout Routes */}
+        {/* Main Application Workspace Layout Routes (Protected by RequireAuth) */}
         <Route
           path="*"
           element={
-            <div className="flex min-h-screen bg-background text-slate-100 font-sans antialiased">
-              {/* Fixed Left Sidebar */}
-              <Sidebar onOpenCreateNoteModal={() => setCreateNoteModalOpen(true)} />
+            <RequireAuth>
+              <div className="flex min-h-screen bg-background text-slate-100 font-sans antialiased">
+                {/* Fixed Left Sidebar */}
+                <Sidebar onOpenCreateNoteModal={() => setCreateNoteModalOpen(true)} />
 
-              {/* Main Application Container */}
-              <div className="flex-1 flex flex-col min-w-0">
-                {/* Top Sticky Header */}
-                <Header />
+                {/* Main Application Container */}
+                <div className="flex-1 flex flex-col min-w-0">
+                  {/* Top Sticky Header */}
+                  <Header />
 
-                {/* Main Page Body View */}
-                <main className="flex-1 overflow-y-auto">
-                  <Routes>
-                    <Route
-                      path="/"
-                      element={
-                        <DashboardPage onOpenCreateNoteModal={() => setCreateNoteModalOpen(true)} />
-                      }
-                    />
-                    <Route
-                      path="/notes"
-                      element={
-                        <NotesPage
-                          onOpenCreateNoteModal={() => setCreateNoteModalOpen(true)}
-                          onOpenShareModal={() => setShareModalOpen(true)}
-                        />
-                      }
-                    />
-                    <Route
-                      path="/notes/:id"
-                      element={<NoteDetailPage onOpenShareModal={() => setShareModalOpen(true)} />}
-                    />
-                    <Route
-                      path="/team"
-                      element={<TeamPage onOpenShareModal={() => setShareModalOpen(true)} />}
-                    />
-                    <Route path="/settings" element={<SettingsPage />} />
-                  </Routes>
-                </main>
+                  {/* Main Page Body View */}
+                  <main className="flex-1 overflow-y-auto">
+                    <Routes>
+                      <Route
+                        path="/"
+                        element={
+                          <DashboardPage onOpenCreateNoteModal={() => setCreateNoteModalOpen(true)} />
+                        }
+                      />
+                      <Route
+                        path="/notes"
+                        element={
+                          <NotesPage
+                            onOpenCreateNoteModal={() => setCreateNoteModalOpen(true)}
+                            onOpenShareModal={() => setShareModalOpen(true)}
+                          />
+                        }
+                      />
+                      <Route
+                        path="/notes/:id"
+                        element={<NoteDetailPage onOpenShareModal={() => setShareModalOpen(true)} />}
+                      />
+                      <Route
+                        path="/team"
+                        element={<TeamPage onOpenShareModal={() => setShareModalOpen(true)} />}
+                      />
+                      <Route path="/settings" element={<SettingsPage />} />
+                    </Routes>
+                  </main>
+                </div>
+
+                {/* Global Modals & Overlay Drawers */}
+                <CommandPalette />
+                <ShareModal isOpen={isShareModalOpen} onClose={() => setShareModalOpen(false)} />
+                <CreateNoteModal isOpen={isCreateNoteModalOpen} onClose={() => setCreateNoteModalOpen(false)} />
               </div>
-
-              {/* Global Modals & Overlay Drawers */}
-              <CommandPalette />
-              <ShareModal isOpen={isShareModalOpen} onClose={() => setShareModalOpen(false)} />
-              <CreateNoteModal isOpen={isCreateNoteModalOpen} onClose={() => setCreateNoteModalOpen(false)} />
-            </div>
+            </RequireAuth>
           }
         />
       </Routes>
