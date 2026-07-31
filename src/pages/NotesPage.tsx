@@ -20,7 +20,7 @@ import { AvatarStack } from '../components/ui/AvatarStack';
 
 interface NotesPageProps {
   onOpenCreateNoteModal?: () => void;
-  onOpenShareModal?: () => void;
+  onOpenShareModal?: (noteId?: string) => void;
 }
 
 export const NotesPage: React.FC<NotesPageProps> = ({

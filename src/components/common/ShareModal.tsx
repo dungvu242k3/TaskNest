@@ -7,10 +7,11 @@ import { MemberPermission } from '../../types';
 interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
+  noteId?: string;
   noteTitle?: string;
 }
 
-export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteTitle }) => {
+export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteId, noteTitle }) => {
   const [email, setEmail] = useState('');
   const [permission, setPermission] = useState<MemberPermission>('edit');
   const [copied, setCopied] = useState(false);
@@ -19,7 +20,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteTit
 
   if (!isOpen) return null;
 
-  const pendingInvites = invitations.filter((i) => i.status === 'pending');
+  const pendingInvites = invitations.filter((i) => i.status === 'pending' && (!noteId || i.noteId === noteId));
   const displayMembers = teamMembers.length > 0 ? teamMembers : currentUser ? [currentUser] : [];
 
   const handleSendInvite = async (e: React.FormEvent) => {
@@ -27,7 +28,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteTit
     if (!email.trim()) return;
 
     const targetEmail = email.trim();
-    await sendInvitationInSupabase(targetEmail, permission);
+    await sendInvitationInSupabase(targetEmail, permission, undefined, noteId, noteTitle);
     setInvitedSuccessEmail(targetEmail);
     setEmail('');
     setTimeout(() => setInvitedSuccessEmail(null), 4000);

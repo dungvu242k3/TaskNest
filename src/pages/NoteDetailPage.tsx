@@ -23,7 +23,7 @@ import { AvatarStack } from '../components/ui/AvatarStack';
 import { PriorityLevel } from '../types';
 
 interface NoteDetailPageProps {
-  onOpenShareModal?: () => void;
+  onOpenShareModal?: (noteId?: string) => void;
 }
 
 export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal }) => {
@@ -398,7 +398,7 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
             {!isPrivate && onOpenShareModal && (
               <div className="pt-2">
                 <button
-                  onClick={onOpenShareModal}
+                  onClick={() => onOpenShareModal(note.id)}
                   className="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all focus:outline-none"
                 >
                   <UserPlus className="h-3.5 w-3.5" />

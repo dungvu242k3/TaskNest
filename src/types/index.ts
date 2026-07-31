@@ -73,6 +73,8 @@ export interface Team {
 export interface TeamInvitation {
   id: string;
   teamId?: string;
+  noteId?: string;
+  noteTitle?: string;
   email: string;
   invitedBy: UserProfile;
   permission: MemberPermission;

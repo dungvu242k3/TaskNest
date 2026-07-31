@@ -45,7 +45,7 @@ interface AppState {
   createTeamInSupabase: (name: string, description?: string) => Promise<Team | null>;
   setActiveTeamId: (teamId: string | null) => void;
   fetchInvitationsFromSupabase: () => Promise<void>;
-  sendInvitationInSupabase: (email: string, permission?: MemberPermission, teamId?: string) => Promise<boolean>;
+  sendInvitationInSupabase: (email: string, permission?: MemberPermission, teamId?: string, noteId?: string, noteTitle?: string) => Promise<boolean>;
   acceptInvitationInSupabase: (invitationId: string) => Promise<void>;
   cancelInvitationInSupabase: (invitationId: string) => Promise<void>;
   fetchDashboardMetricsFromSupabase: (userId?: string) => Promise<DashboardMetrics | null>;
@@ -368,6 +368,8 @@ export const useAppStore = create<AppState>()(
         const mapped: TeamInvitation[] = data.map((item: any) => ({
           id: item.id,
           teamId: item.team_id || undefined,
+          noteId: item.note_id || undefined,
+          noteTitle: item.note_title || undefined,
           email: item.email,
           invitedBy: get().currentUser || CURRENT_USER,
           permission: item.permission || 'edit',
@@ -381,14 +383,21 @@ export const useAppStore = create<AppState>()(
     }
   },
 
-  // 1f. Send Invitation in Supabase DB
-  sendInvitationInSupabase: async (email, permission = 'edit', teamId) => {
+  // 1f. Send Invitation in Supabase DB (Team or Specific Note)
+  sendInvitationInSupabase: async (email, permission = 'edit', teamId, noteId, noteTitle) => {
     const sanitizedEmail = email.trim().toLowerCase();
     if (!sanitizedEmail) return false;
+
+    // Automatically change private note to Shared Note when inviting members
+    if (noteId) {
+      get().updateNote(noteId, { isPrivate: false });
+    }
 
     const newInvite: TeamInvitation = {
       id: `inv-${Date.now()}`,
       teamId: teamId || get().activeTeamId || undefined,
+      noteId,
+      noteTitle,
       email: sanitizedEmail,
       invitedBy: get().currentUser || CURRENT_USER,
       permission,
@@ -402,15 +411,18 @@ export const useAppStore = create<AppState>()(
 
     if (isSupabaseConfigured && get().currentUser?.id) {
       try {
+        const payload: any = {
+          email: sanitizedEmail,
+          permission,
+          team_id: teamId || get().activeTeamId || null,
+          invited_by: get().currentUser?.id,
+          status: 'pending',
+        };
+        if (noteId) payload.note_id = noteId;
+
         const { data, error } = await supabase
           .from('team_invitations')
-          .insert({
-            email: sanitizedEmail,
-            permission,
-            team_id: teamId || get().activeTeamId || null,
-            invited_by: get().currentUser?.id,
-            status: 'pending',
-          })
+          .insert(payload)
           .select()
           .single();
 
@@ -431,11 +443,49 @@ export const useAppStore = create<AppState>()(
 
   // 1g. Accept Invitation
   acceptInvitationInSupabase: async (invitationId) => {
+    const targetInvite = get().invitations.find((i) => i.id === invitationId);
+    const currUser = get().currentUser || CURRENT_USER;
+
     set((state) => ({
       invitations: state.invitations.map((i) =>
         i.id === invitationId ? { ...i, status: 'accepted' } : i
       ),
     }));
+
+    // If invitation is for a specific note, join note members list
+    if (targetInvite?.noteId) {
+      const targetNoteId = targetInvite.noteId;
+      set((state) => ({
+        notes: state.notes.map((note) => {
+          if (note.id !== targetNoteId) return note;
+          const exists = note.members.some(
+            (m) => m.user.email.toLowerCase() === currUser.email.toLowerCase()
+          );
+          if (exists) return note;
+          return {
+            ...note,
+            isPrivate: false,
+            members: [
+              ...note.members,
+              { user: currUser, permission: targetInvite.permission, status: 'accepted' },
+            ],
+          };
+        }),
+      }));
+
+      if (isSupabaseConfigured && currUser.id) {
+        try {
+          await supabase.from('note_members').insert({
+            note_id: targetNoteId,
+            user_id: currUser.id,
+            permission: targetInvite.permission,
+            status: 'accepted',
+          });
+        } catch (err) {
+          console.warn('Supabase add note member notice:', err);
+        }
+      }
+    }
 
     if (isSupabaseConfigured) {
       try {
@@ -448,6 +498,7 @@ export const useAppStore = create<AppState>()(
       }
     }
     get().fetchProfilesFromSupabase();
+    get().fetchNotesFromSupabase();
   },
 
   // 1h. Cancel / Revoke Invitation

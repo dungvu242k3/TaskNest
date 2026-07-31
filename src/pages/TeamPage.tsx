@@ -20,7 +20,7 @@ import { useAppStore } from '../hooks/useAppStore';
 import { CreateTeamModal } from '../components/common/CreateTeamModal';
 
 interface TeamPageProps {
-  onOpenShareModal?: () => void;
+  onOpenShareModal?: (noteId?: string) => void;
 }
 
 export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
@@ -92,7 +92,7 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
 
           {onOpenShareModal && (
             <button
-              onClick={onOpenShareModal}
+              onClick={() => onOpenShareModal()}
               className="inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-2xl bg-surface-hover/80 hover:bg-surface-hover text-slate-200 text-xs font-semibold border border-surface-border transition-all duration-200 shrink-0"
             >
               <UserPlus className="h-4 w-4 text-indigo-400" />

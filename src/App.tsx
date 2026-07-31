@@ -16,8 +16,14 @@ import { useAppStore } from './hooks/useAppStore';
 
 export const App: React.FC = () => {
   const [isShareModalOpen, setShareModalOpen] = useState(false);
+  const [shareModalNoteId, setShareModalNoteId] = useState<string | undefined>(undefined);
   const [isCreateNoteModalOpen, setCreateNoteModalOpen] = useState(false);
   const { fetchNotesFromSupabase, subscribeToRealtimeNotes, initAuthSession } = useAppStore();
+
+  const handleOpenShareModal = (noteId?: string) => {
+    setShareModalNoteId(noteId);
+    setShareModalOpen(true);
+  };
 
   // Global Supabase Realtime Subscription, Auth Check & Initial Fetch
   useEffect(() => {
@@ -61,17 +67,17 @@ export const App: React.FC = () => {
                         element={
                           <NotesPage
                             onOpenCreateNoteModal={() => setCreateNoteModalOpen(true)}
-                            onOpenShareModal={() => setShareModalOpen(true)}
+                            onOpenShareModal={(id) => handleOpenShareModal(id)}
                           />
                         }
                       />
                       <Route
                         path="/notes/:id"
-                        element={<NoteDetailPage onOpenShareModal={() => setShareModalOpen(true)} />}
+                        element={<NoteDetailPage onOpenShareModal={(id) => handleOpenShareModal(id)} />}
                       />
                       <Route
                         path="/team"
-                        element={<TeamPage onOpenShareModal={() => setShareModalOpen(true)} />}
+                        element={<TeamPage onOpenShareModal={() => handleOpenShareModal()} />}
                       />
                       <Route path="/settings" element={<SettingsPage />} />
                     </Routes>
@@ -80,7 +86,11 @@ export const App: React.FC = () => {
 
                 {/* Global Modals & Overlay Drawers */}
                 <CommandPalette />
-                <ShareModal isOpen={isShareModalOpen} onClose={() => setShareModalOpen(false)} />
+                <ShareModal
+                  isOpen={isShareModalOpen}
+                  onClose={() => setShareModalOpen(false)}
+                  noteId={shareModalNoteId}
+                />
                 <CreateNoteModal isOpen={isCreateNoteModalOpen} onClose={() => setCreateNoteModalOpen(false)} />
               </div>
             </RequireAuth>
