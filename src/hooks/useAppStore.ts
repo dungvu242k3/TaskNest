@@ -91,7 +91,10 @@ export const useAppStore = create<AppState>()(
 
   // Initialize Dynamic Supabase Auth Session
   initAuthSession: async () => {
-    if (!isSupabaseConfigured) return;
+    if (!isSupabaseConfigured) {
+      set({ isLoggedIn: false, currentUser: null });
+      return;
+    }
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -126,6 +129,7 @@ export const useAppStore = create<AppState>()(
       });
     } catch (err) {
       console.warn('Supabase auth session check notice:', err);
+      set({ isLoggedIn: false, currentUser: null });
     }
   },
 
@@ -542,8 +546,6 @@ export const useAppStore = create<AppState>()(
   partialize: (state) => ({
     notes: state.notes,
     teamMembers: state.teamMembers,
-    isLoggedIn: state.isLoggedIn,
-    currentUser: state.currentUser,
   }),
 }
 )
