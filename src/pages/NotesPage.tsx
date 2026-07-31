@@ -5,10 +5,14 @@ import { useAppStore } from '../hooks/useAppStore';
 import { PriorityBadge } from '../components/ui/PriorityBadge';
 import { AvatarStack } from '../components/ui/AvatarStack';
 
-export const NotesPage: React.FC = () => {
+interface NotesPageProps {
+  onOpenCreateNoteModal?: () => void;
+}
+
+export const NotesPage: React.FC<NotesPageProps> = ({ onOpenCreateNoteModal }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { notes, setQuickPeekNoteId, togglePinNote, addNote } = useAppStore();
+  const { notes, setQuickPeekNoteId, togglePinNote } = useAppStore();
 
   const currentTab = searchParams.get('tab') || 'all';
   const [filterPriority, setFilterPriority] = React.useState<string>('all');
@@ -39,12 +43,6 @@ export const NotesPage: React.FC = () => {
     setSearchParams({ tab });
   };
 
-  const handleCreateNote = () => {
-    const isPrivate = currentTab === 'private';
-    const newNote = addNote('Ghi chú chưa đặt tên', isPrivate);
-    navigate(`/notes/${newNote.id}`);
-  };
-
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-6 animate-in fade-in duration-200">
       {/* Header Banner */}
@@ -57,7 +55,7 @@ export const NotesPage: React.FC = () => {
         </div>
 
         <button
-          onClick={handleCreateNote}
+          onClick={onOpenCreateNoteModal}
           className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all"
         >
           <Plus className="h-4 w-4" />
@@ -167,7 +165,7 @@ export const NotesPage: React.FC = () => {
             Không có ghi chú nào phù hợp với bộ lọc tìm kiếm hiện tại. Hãy tạo ghi chú mới ngay!
           </p>
           <button
-            onClick={handleCreateNote}
+            onClick={onOpenCreateNoteModal}
             className="py-2 px-4 rounded-xl bg-indigo-600 text-white text-xs font-semibold"
           >
             Tạo Ghi chú mới

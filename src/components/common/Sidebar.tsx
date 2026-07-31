@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   FileText,
@@ -16,23 +16,18 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '../../hooks/useAppStore';
 
-export const Sidebar: React.FC = () => {
+interface SidebarProps {
+  onOpenCreateNoteModal?: () => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateNoteModal }) => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { notes, addNote } = useAppStore();
+  const { notes } = useAppStore();
 
   const [isNotesMenuOpen, setIsNotesMenuOpen] = useState(true);
 
   const privateCount = notes.filter((n) => n.isPrivate).length;
   const sharedCount = notes.filter((n) => !n.isPrivate).length;
-
-  const handleCreateQuickNote = (isPrivate: boolean) => {
-    const title = prompt(isPrivate ? 'Nhập tiêu đề Ghi chú Riêng tư mới:' : 'Nhập tiêu đề Ghi chú Nhóm mới:');
-    if (title && title.trim()) {
-      const newNote = addNote(title.trim(), isPrivate);
-      navigate(`/notes/${newNote.id}`);
-    }
-  };
 
   const isNotesActive = location.pathname.startsWith('/notes');
   const searchParams = new URLSearchParams(location.search);
@@ -54,24 +49,15 @@ export const Sidebar: React.FC = () => {
           </div>
         </div>
 
-        {/* Quick Action Buttons */}
+        {/* Combined Single Primary Action Button */}
         <div className="p-4">
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => handleCreateQuickNote(true)}
-              className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-semibold transition-all"
-            >
-              <Lock className="h-3.5 w-3.5" />
-              <span>+ Riêng tư</span>
-            </button>
-            <button
-              onClick={() => handleCreateQuickNote(false)}
-              className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-xs font-semibold transition-all shadow-glow"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              <span>+ Dùng chung</span>
-            </button>
-          </div>
+          <button
+            onClick={onOpenCreateNoteModal}
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Tạo ghi chú mới</span>
+          </button>
         </div>
 
         {/* Hierarchical Navigation Menu */}
@@ -155,7 +141,7 @@ export const Sidebar: React.FC = () => {
                   <span className="text-[10px] text-amber-400/80 font-mono">{privateCount}</span>
                 </NavLink>
 
-                {/* Child 3: Ghi chú dùng chung */}
+                {/* Child 3: Ghi chú chung */}
                 <NavLink
                   to="/notes?tab=shared"
                   className={() =>
