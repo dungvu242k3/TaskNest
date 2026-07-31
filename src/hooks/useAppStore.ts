@@ -176,10 +176,12 @@ export const useAppStore = create<AppState>((set, get) => ({
       ),
     }));
 
-    try {
-      await supabase.from('notes').update({ pinned: newPinned }).eq('id', id);
-    } catch (err) {
-      console.warn('Supabase pin note sync notice:', err);
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from('notes').update({ pinned: newPinned }).eq('id', id);
+      } catch (err) {
+        console.warn('Supabase pin note sync notice:', err);
+      }
     }
   },
 
@@ -191,10 +193,12 @@ export const useAppStore = create<AppState>((set, get) => ({
       ),
     }));
 
-    try {
-      await supabase.from('notes').update({ status }).eq('id', id);
-    } catch (err) {
-      console.warn('Supabase note status sync notice:', err);
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from('notes').update({ status }).eq('id', id);
+      } catch (err) {
+        console.warn('Supabase note status sync notice:', err);
+      }
     }
   },
 
@@ -206,16 +210,18 @@ export const useAppStore = create<AppState>((set, get) => ({
       ),
     }));
 
-    try {
-      const payload: any = {};
-      if (updates.title !== undefined) payload.title = updates.title;
-      if (updates.content !== undefined) payload.content = updates.content;
-      if (updates.isPrivate !== undefined) payload.is_private = updates.isPrivate;
-      if (updates.priority !== undefined) payload.priority = updates.priority;
+    if (isSupabaseConfigured) {
+      try {
+        const payload: any = {};
+        if (updates.title !== undefined) payload.title = updates.title;
+        if (updates.content !== undefined) payload.content = updates.content;
+        if (updates.isPrivate !== undefined) payload.is_private = updates.isPrivate;
+        if (updates.priority !== undefined) payload.priority = updates.priority;
 
-      await supabase.from('notes').update(payload).eq('id', id);
-    } catch (err) {
-      console.warn('Supabase update note sync notice:', err);
+        await supabase.from('notes').update(payload).eq('id', id);
+      } catch (err) {
+        console.warn('Supabase update note sync notice:', err);
+      }
     }
   },
 
@@ -239,13 +245,15 @@ export const useAppStore = create<AppState>((set, get) => ({
       }),
     }));
 
-    try {
-      await supabase
-        .from('notes')
-        .update({ checklist: updatedChecklist })
-        .eq('id', noteId);
-    } catch (err) {
-      console.warn('Supabase toggle checklist sync notice:', err);
+    if (isSupabaseConfigured) {
+      try {
+        await supabase
+          .from('notes')
+          .update({ checklist: updatedChecklist })
+          .eq('id', noteId);
+      } catch (err) {
+        console.warn('Supabase toggle checklist sync notice:', err);
+      }
     }
   },
 
@@ -272,13 +280,15 @@ export const useAppStore = create<AppState>((set, get) => ({
       }),
     }));
 
-    try {
-      await supabase
-        .from('notes')
-        .update({ checklist: updatedChecklist })
-        .eq('id', noteId);
-    } catch (err) {
-      console.warn('Supabase add checklist sync notice:', err);
+    if (isSupabaseConfigured) {
+      try {
+        await supabase
+          .from('notes')
+          .update({ checklist: updatedChecklist })
+          .eq('id', noteId);
+      } catch (err) {
+        console.warn('Supabase add checklist sync notice:', err);
+      }
     }
   },
 
@@ -300,13 +310,15 @@ export const useAppStore = create<AppState>((set, get) => ({
       }),
     }));
 
-    try {
-      await supabase
-        .from('notes')
-        .update({ checklist: updatedChecklist })
-        .eq('id', noteId);
-    } catch (err) {
-      console.warn('Supabase delete checklist sync notice:', err);
+    if (isSupabaseConfigured) {
+      try {
+        await supabase
+          .from('notes')
+          .update({ checklist: updatedChecklist })
+          .eq('id', noteId);
+      } catch (err) {
+        console.warn('Supabase delete checklist sync notice:', err);
+      }
     }
   },
 
@@ -330,13 +342,15 @@ export const useAppStore = create<AppState>((set, get) => ({
       }),
     }));
 
-    try {
-      await supabase
-        .from('notes')
-        .update({ checklist: updatedChecklist })
-        .eq('id', noteId);
-    } catch (err) {
-      console.warn('Supabase update checklist item sync notice:', err);
+    if (isSupabaseConfigured) {
+      try {
+        await supabase
+          .from('notes')
+          .update({ checklist: updatedChecklist })
+          .eq('id', noteId);
+      } catch (err) {
+        console.warn('Supabase update checklist item sync notice:', err);
+      }
     }
   },
 
@@ -374,22 +388,24 @@ export const useAppStore = create<AppState>((set, get) => ({
     set((state) => ({ notes: [newNote, ...state.notes] }));
 
     // Async Insert to Supabase DB
-    supabase
-      .from('notes')
-      .insert({
-        owner_id: CURRENT_USER.id,
-        title: newNote.title,
-        content: '',
-        is_private: isPrivate,
-        status: 'todo',
-        priority,
-        tags: newNote.tags,
-        checklist: [],
-        pinned: false,
-      })
-      .then(({ data, error }) => {
-        if (error) console.warn('Supabase insert note notice:', error);
-      });
+    if (isSupabaseConfigured) {
+      supabase
+        .from('notes')
+        .insert({
+          owner_id: CURRENT_USER.id,
+          title: newNote.title,
+          content: '',
+          is_private: isPrivate,
+          status: 'todo',
+          priority,
+          tags: newNote.tags,
+          checklist: [],
+          pinned: false,
+        })
+        .then(({ data, error }) => {
+          if (error) console.warn('Supabase insert note notice:', error);
+        });
+    }
 
     return newNote;
   },
@@ -401,10 +417,12 @@ export const useAppStore = create<AppState>((set, get) => ({
       quickPeekNoteId: state.quickPeekNoteId === id ? null : state.quickPeekNoteId,
     }));
 
-    try {
-      await supabase.from('notes').delete().eq('id', id);
-    } catch (err) {
-      console.warn('Supabase delete note sync notice:', err);
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from('notes').delete().eq('id', id);
+      } catch (err) {
+        console.warn('Supabase delete note sync notice:', err);
+      }
     }
   },
 
@@ -424,13 +442,15 @@ export const useAppStore = create<AppState>((set, get) => ({
       ),
     }));
 
-    try {
-      await supabase
-        .from('note_members')
-        .update({ permission })
-        .match({ note_id: noteId, user_id: userId });
-    } catch (err) {
-      console.warn('Supabase update member permission sync notice:', err);
+    if (isSupabaseConfigured) {
+      try {
+        await supabase
+          .from('note_members')
+          .update({ permission })
+          .match({ note_id: noteId, user_id: userId });
+      } catch (err) {
+        console.warn('Supabase update member permission sync notice:', err);
+      }
     }
   },
 
@@ -444,13 +464,15 @@ export const useAppStore = create<AppState>((set, get) => ({
       })),
     }));
 
-    try {
-      await supabase.rpc('remove_workspace_member', {
-        p_workspace_id: 'default-workspace-id',
-        p_user_id: userId,
-      });
-    } catch (err) {
-      console.warn('Supabase remove team member RPC notice:', err);
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.rpc('remove_workspace_member', {
+          p_workspace_id: 'default-workspace-id',
+          p_user_id: userId,
+        });
+      } catch (err) {
+        console.warn('Supabase remove team member RPC notice:', err);
+      }
     }
   },
 }));
