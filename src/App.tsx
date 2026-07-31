@@ -16,14 +16,15 @@ import { useAppStore } from './hooks/useAppStore';
 export const App: React.FC = () => {
   const [isShareModalOpen, setShareModalOpen] = useState(false);
   const [isCreateNoteModalOpen, setCreateNoteModalOpen] = useState(false);
-  const { fetchNotesFromSupabase, subscribeToRealtimeNotes } = useAppStore();
+  const { fetchNotesFromSupabase, subscribeToRealtimeNotes, initAuthSession } = useAppStore();
 
-  // Global Supabase Realtime Subscription & Initial Fetch
+  // Global Supabase Realtime Subscription, Auth Check & Initial Fetch
   useEffect(() => {
+    initAuthSession();
     fetchNotesFromSupabase();
     const unsubscribe = subscribeToRealtimeNotes();
     return () => unsubscribe();
-  }, [fetchNotesFromSupabase, subscribeToRealtimeNotes]);
+  }, [initAuthSession, fetchNotesFromSupabase, subscribeToRealtimeNotes]);
 
   return (
     <Router>

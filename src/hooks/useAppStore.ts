@@ -33,6 +33,7 @@ interface AppState {
   login: () => void;
   logout: () => Promise<void>;
   updateUserProfile: (updates: Partial<UserProfile>) => void;
+  initAuthSession: () => Promise<void>;
 
   // Supabase Backend Sync Actions
   fetchNotesFromSupabase: () => Promise<void>;
@@ -63,8 +64,8 @@ export const useAppStore = create<AppState>()(
   quickPeekNoteId: null,
   isLoadingSupabase: false,
   dashboardMetrics: null,
-  isLoggedIn: true,
-  currentUser: CURRENT_USER,
+  isLoggedIn: false,
+  currentUser: null,
 
   setSearchQuery: (query) => set({ searchQuery: query }),
   setCommandPaletteOpen: (isOpen) => set({ isCommandPaletteOpen: isOpen }),
@@ -87,6 +88,46 @@ export const useAppStore = create<AppState>()(
         ? { ...state.currentUser, ...updates }
         : { ...CURRENT_USER, ...updates },
     })),
+
+  // Initialize Dynamic Supabase Auth Session
+  initAuthSession: async () => {
+    if (!isSupabaseConfigured) return;
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        set({
+          isLoggedIn: true,
+          currentUser: {
+            id: session.user.id,
+            fullName: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Tài khoản',
+            email: session.user.email || '',
+            avatarUrl: session.user.user_metadata?.avatar_url || CURRENT_USER.avatarUrl,
+          },
+        });
+      } else {
+        set({ isLoggedIn: false, currentUser: null });
+      }
+
+      supabase.auth.onAuthStateChange((_event, session) => {
+        if (session?.user) {
+          set({
+            isLoggedIn: true,
+            currentUser: {
+              id: session.user.id,
+              fullName: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Tài khoản',
+              email: session.user.email || '',
+              avatarUrl: session.user.user_metadata?.avatar_url || CURRENT_USER.avatarUrl,
+            },
+          });
+        } else {
+          set({ isLoggedIn: false, currentUser: null });
+        }
+      });
+    } catch (err) {
+      console.warn('Supabase auth session check notice:', err);
+    }
+  },
 
   // 1. Fetch Notes from Supabase DB
   fetchNotesFromSupabase: async () => {
