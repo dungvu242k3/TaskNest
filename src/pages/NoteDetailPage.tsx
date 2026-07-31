@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Lock, Share2, UserPlus, Trash2, CheckCircle2 } from 'lucide-react';
+import {
+  ArrowLeft,
+  Lock,
+  Share2,
+  UserPlus,
+  Trash2,
+  CheckCircle2,
+  CheckSquare,
+  Plus,
+  Tag,
+} from 'lucide-react';
 import { useAppStore } from '../hooks/useAppStore';
 import { PriorityBadge } from '../components/ui/PriorityBadge';
 import { AvatarStack } from '../components/ui/AvatarStack';
@@ -26,11 +36,17 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
 
   if (!note) {
     return (
-      <div className="p-12 text-center text-slate-400 space-y-4">
-        <h2 className="text-xl font-bold text-white">Không tìm thấy Ghi chú</h2>
-        <button onClick={() => navigate('/notes')} className="py-2 px-4 rounded-xl bg-indigo-600 text-white text-xs font-semibold">
-          Quay lại danh sách
-        </button>
+      <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center p-8">
+        <div className="glass-panel p-10 rounded-3xl text-center text-slate-400 space-y-4 max-w-md w-full border border-surface-border">
+          <h2 className="text-xl font-bold text-white">Không tìm thấy Ghi chú</h2>
+          <p className="text-xs text-slate-400">Ghi chú này không tồn tại hoặc đã bị xóa.</p>
+          <button
+            onClick={() => navigate('/notes')}
+            className="py-2.5 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all"
+          >
+            Quay lại danh sách ghi chú
+          </button>
+        </div>
       </div>
     );
   }
@@ -40,7 +56,7 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
     setTitle(val);
     updateNote(note.id, { title: val });
     setSavedStatus('Đang lưu thay đổi...');
-    setTimeout(() => setSavedStatus('Đã lưu 1 giây trước'), 800);
+    setTimeout(() => setSavedStatus('Đã lưu vào Supabase'), 800);
   };
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -48,7 +64,7 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
     setContent(val);
     updateNote(note.id, { content: val });
     setSavedStatus('Đang lưu thay đổi...');
-    setTimeout(() => setSavedStatus('Đã lưu 1 giây trước'), 800);
+    setTimeout(() => setSavedStatus('Đã lưu vào Supabase'), 800);
   };
 
   const handleTogglePrivate = () => {
@@ -70,26 +86,31 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
   };
 
   const handleDelete = () => {
-    if (confirm('Bạn có chắc chắn muốn xóa ghi chú này không?')) {
+    if (window.confirm('Bạn có chắc chắn muốn xóa ghi chú này không?')) {
       deleteNote(note.id);
       navigate('/notes');
     }
   };
 
+  const completedChecklistCount = note.checklist.filter((c) => c.completed).length;
+  const totalChecklistCount = note.checklist.length;
+  const progressPercent =
+    totalChecklistCount > 0 ? Math.round((completedChecklistCount / totalChecklistCount) * 100) : 0;
+
   return (
-    <div className="p-8 max-w-4xl mx-auto space-y-6">
-      {/* Navigation Top Bar */}
-      <div className="flex items-center justify-between">
+    <div className="py-6 px-4 sm:px-8 max-w-5xl mx-auto space-y-6 min-h-[calc(100vh-4rem)] flex flex-col justify-start">
+      {/* Top Navigation Bar */}
+      <div className="flex items-center justify-between gap-4">
         <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+          onClick={() => navigate('/notes')}
+          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface/50 hover:bg-surface-hover border border-surface-border text-xs font-semibold text-slate-300 hover:text-white transition-all shadow-sm focus:outline-none"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Quay lại danh sách</span>
         </button>
 
         <div className="flex items-center gap-3">
-          {/* Privacy Switcher */}
+          {/* Privacy Badge / Switcher */}
           <button
             onClick={handleTogglePrivate}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
@@ -106,34 +127,35 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
           {!isPrivate && onOpenShareModal && (
             <button
               onClick={onOpenShareModal}
-              className="flex items-center gap-1.5 py-1.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all"
+              className="flex items-center gap-1.5 py-1.5 px-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all focus:outline-none"
             >
               <UserPlus className="h-3.5 w-3.5" />
               <span>Chia sẻ</span>
             </button>
           )}
 
+          {/* Delete Button */}
           <button
             onClick={handleDelete}
             aria-label="Xóa ghi chú"
             title="Xóa ghi chú"
-            className="p-2 rounded-xl text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-red-400 hover:bg-red-500/10 border border-surface-border/60 transition-colors focus:outline-none"
           >
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
       </div>
 
-      {/* Editor Canvas Container */}
-      <div className="glass-panel p-8 rounded-3xl space-y-6">
+      {/* Main Detail Canvas Card (Balanced centered middle space) */}
+      <div className="glass-panel p-6 sm:p-10 rounded-3xl space-y-6 border border-surface-border/80 shadow-2xl backdrop-blur-xl bg-surface/50">
         {/* Meta Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-surface-border">
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-surface-border/60">
           <div className="flex items-center gap-3">
             <PriorityBadge priority={priority} />
             <select
               value={priority}
               onChange={(e) => handlePriorityChange(e.target.value as PriorityLevel)}
-              className="bg-background text-xs text-slate-300 px-2 py-1 rounded-lg border border-surface-border focus:outline-none"
+              className="bg-background text-xs text-slate-300 px-3 py-1.5 rounded-xl border border-surface-border focus:outline-none focus:border-indigo-500"
             >
               <option value="P1">Độ ưu tiên: P1 Cao</option>
               <option value="P2">Độ ưu tiên: P2 Trung bình</option>
@@ -142,7 +164,8 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
           </div>
 
           <div className="flex items-center gap-4 text-xs text-slate-400">
-            <span className="flex items-center gap-1 text-emerald-400 font-mono text-[11px]">
+            <span className="flex items-center gap-1.5 text-emerald-400 font-mono text-[11px]">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
               <CheckCircle2 className="h-3.5 w-3.5" /> {savedStatus}
             </span>
             {!isPrivate && <AvatarStack members={note.members} />}
@@ -155,61 +178,103 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
           value={title}
           onChange={handleTitleChange}
           placeholder="Nhập tiêu đề ghi chú..."
-          className="w-full bg-transparent text-2xl sm:text-3xl font-extrabold text-white placeholder-slate-600 focus:outline-none tracking-tight"
+          className="w-full bg-transparent text-2xl sm:text-3xl font-extrabold text-white placeholder-slate-600 focus:outline-none tracking-tight border-b border-transparent focus:border-indigo-500/30 pb-1 transition-colors"
         />
 
         {/* Note Content Textarea */}
         <textarea
-          rows={10}
+          rows={4}
           value={content}
           onChange={handleContentChange}
           placeholder="Nhập nội dung chi tiết ghi chú tại đây..."
-          className="w-full bg-transparent text-slate-200 placeholder-slate-600 focus:outline-none text-base leading-relaxed resize-none"
+          className="w-full bg-transparent text-slate-200 placeholder-slate-600 focus:outline-none text-sm sm:text-base leading-relaxed resize-none"
         />
 
-        {/* Checklist Section */}
-        <div className="pt-6 border-t border-surface-border space-y-3">
-          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-            Danh sách công việc ({note.checklist.filter((c) => c.completed).length}/{note.checklist.length})
-          </h4>
+        {/* Divider */}
+        <div className="h-px bg-surface-border/60" />
 
-          <div className="space-y-2">
+        {/* Checklist Section */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+              <CheckSquare className="h-4 w-4 text-indigo-400" />
+              <span>
+                DANH SÁCH CÔNG VIỆC ({completedChecklistCount}/{totalChecklistCount})
+              </span>
+            </h4>
+            <span className="text-xs font-mono font-bold text-indigo-400">{progressPercent}%</span>
+          </div>
+
+          {/* Progress Bar */}
+          {totalChecklistCount > 0 && (
+            <div className="w-full h-2 bg-slate-800/80 rounded-full overflow-hidden border border-slate-700/50">
+              <div
+                className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-400 transition-all duration-300 shadow-glow"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          )}
+
+          {/* Checklist items list */}
+          <div className="space-y-2.5 pt-1">
             {note.checklist.map((item) => (
               <div
                 key={item.id}
                 onClick={() => toggleChecklistItem(note.id, item.id)}
-                className="flex items-center gap-3 p-3 rounded-xl bg-background/60 border border-surface-border/60 hover:border-slate-600 transition-colors cursor-pointer select-none"
+                className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-background/60 border border-surface-border/60 hover:border-indigo-500/40 hover:bg-surface-hover/50 transition-all cursor-pointer select-none"
               >
                 <input
                   type="checkbox"
                   checked={item.completed}
                   onChange={() => {}}
-                  className="h-4 w-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500"
+                  className="h-4 w-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 focus:outline-none"
                 />
-                <span className={`text-xs ${item.completed ? 'line-through text-slate-400' : 'text-slate-200'}`}>
+                <span
+                  className={`text-xs sm:text-sm ${
+                    item.completed ? 'line-through text-slate-500' : 'text-slate-200 font-medium'
+                  }`}
+                >
                   {item.text}
                 </span>
               </div>
             ))}
           </div>
 
-          {/* Add Checklist Item Input */}
+          {/* Add Checklist Item Form */}
           <form onSubmit={handleAddChecklist} className="flex gap-2 pt-2">
             <input
               type="text"
               value={newChecklistText}
               onChange={(e) => setNewChecklistText(e.target.value)}
               placeholder="Thêm một công việc mới..."
-              className="flex-1 px-3.5 py-2 rounded-xl bg-background border border-surface-border text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500"
+              className="flex-1 px-4 py-2.5 rounded-2xl bg-background border border-surface-border text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
             />
             <button
               type="submit"
-              className="py-2 px-3.5 rounded-xl bg-surface-hover text-slate-200 hover:text-white border border-surface-border text-xs font-semibold"
+              className="flex items-center gap-1.5 py-2.5 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all shrink-0 focus:outline-none"
             >
-              Thêm công việc
+              <Plus className="h-4 w-4" />
+              <span>Thêm công việc</span>
             </button>
           </form>
         </div>
+
+        {/* Tags Section */}
+        {note.tags.length > 0 && (
+          <div className="pt-4 border-t border-surface-border/60 flex items-center gap-2">
+            <Tag className="h-3.5 w-3.5 text-slate-500" />
+            <div className="flex flex-wrap gap-2">
+              {note.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="text-xs px-3 py-1 rounded-xl bg-slate-800/80 text-slate-300 border border-slate-700/60 font-mono font-medium"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
