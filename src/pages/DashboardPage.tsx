@@ -18,7 +18,7 @@ export const DashboardPage: React.FC = () => {
   );
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-200">
+    <div className="p-8 max-w-7xl mx-auto space-y-8">
       {/* Welcome Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-900/40 via-surface to-surface border border-indigo-500/20 p-8">
         <div className="relative z-10 max-w-2xl">

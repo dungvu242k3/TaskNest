@@ -77,7 +77,7 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto space-y-6 animate-in fade-in duration-200">
+    <div className="p-8 max-w-4xl mx-auto space-y-6">
       {/* Navigation Top Bar */}
       <div className="flex items-center justify-between">
         <button

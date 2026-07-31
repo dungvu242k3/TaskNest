@@ -20,7 +20,7 @@ export const SettingsPage: React.FC = () => {
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto space-y-6 animate-in fade-in duration-200">
+    <div className="p-8 max-w-4xl mx-auto space-y-6">
       {/* Header Banner */}
       <div>
         <h1 className="text-2xl font-bold text-white tracking-tight">Cài đặt & Cấu hình</h1>

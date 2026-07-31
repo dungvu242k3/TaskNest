@@ -44,7 +44,7 @@ export const NotesPage: React.FC<NotesPageProps> = ({ onOpenCreateNoteModal }) =
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6 animate-in fade-in duration-200">
+    <div className="p-8 max-w-7xl mx-auto space-y-6">
       {/* Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
