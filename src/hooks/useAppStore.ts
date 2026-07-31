@@ -20,6 +20,8 @@ interface AppState {
   updateNote: (id: string, updates: Partial<Pick<Note, 'title' | 'content' | 'isPrivate' | 'priority'>>) => void;
   toggleChecklistItem: (noteId: string, checklistId: string) => void;
   addChecklistItem: (noteId: string, text: string) => void;
+  deleteChecklistItem: (noteId: string, checklistId: string) => void;
+  updateChecklistItem: (noteId: string, checklistId: string, text: string) => void;
   addNote: (title: string, isPrivate: boolean, priority?: PriorityLevel) => Note;
   deleteNote: (id: string) => void;
 }
@@ -82,6 +84,32 @@ export const useAppStore = create<AppState>((set, get) => ({
         return {
           ...note,
           checklist: [...note.checklist, newItem],
+          updatedAt: new Date().toISOString(),
+        };
+      }),
+    })),
+
+  deleteChecklistItem: (noteId, checklistId) =>
+    set((state) => ({
+      notes: state.notes.map((note) => {
+        if (note.id !== noteId) return note;
+        return {
+          ...note,
+          checklist: note.checklist.filter((item) => item.id !== checklistId),
+          updatedAt: new Date().toISOString(),
+        };
+      }),
+    })),
+
+  updateChecklistItem: (noteId, checklistId, text) =>
+    set((state) => ({
+      notes: state.notes.map((note) => {
+        if (note.id !== noteId) return note;
+        return {
+          ...note,
+          checklist: note.checklist.map((item) =>
+            item.id === checklistId ? { ...item, text } : item
+          ),
           updatedAt: new Date().toISOString(),
         };
       }),

@@ -23,11 +23,11 @@ export const PriorityBadge: React.FC<PriorityBadgeProps> = ({ priority, classNam
   const getLabel = () => {
     switch (priority) {
       case 'P1':
-        return 'P1 • Cao';
+        return 'Cao';
       case 'P2':
-        return 'P2 • Trung bình';
+        return 'Trung bình';
       case 'P3':
-        return 'P3 • Thấp';
+        return 'Thấp';
       default:
         return priority;
     }
