@@ -14,22 +14,19 @@ export const NotesPage: React.FC = () => {
   const [filterPriority, setFilterPriority] = React.useState<string>('all');
   const [searchFilter, setSearchFilter] = React.useState<string>('');
 
-  // Filter notes based on active Tab
   let filteredNotes = notes;
   if (currentTab === 'private') {
     filteredNotes = notes.filter((n) => n.isPrivate);
   } else if (currentTab === 'shared') {
     filteredNotes = notes.filter((n) => !n.isPrivate);
   } else if (currentTab === 'trash') {
-    filteredNotes = []; // Empty mock trash
+    filteredNotes = [];
   }
 
-  // Filter notes based on Priority
   if (filterPriority !== 'all') {
     filteredNotes = filteredNotes.filter((n) => n.priority === filterPriority);
   }
 
-  // Filter notes based on Search keyword
   if (searchFilter.trim()) {
     filteredNotes = filteredNotes.filter(
       (n) =>
@@ -44,7 +41,7 @@ export const NotesPage: React.FC = () => {
 
   const handleCreateNote = () => {
     const isPrivate = currentTab === 'private';
-    const newNote = addNote('Untitled Note', isPrivate);
+    const newNote = addNote('Ghi chú chưa đặt tên', isPrivate);
     navigate(`/notes/${newNote.id}`);
   };
 
@@ -53,9 +50,9 @@ export const NotesPage: React.FC = () => {
       {/* Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Work Notes Workspace</h1>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Quản lý Ghi chú Công việc</h1>
           <p className="text-xs text-slate-400 mt-1">
-            Manage your personal vault & shared team collaborations seamlessly.
+            Tổ chức kho ghi chú cá nhân & hợp tác công việc cùng nhóm hiệu quả.
           </p>
         </div>
 
@@ -64,7 +61,7 @@ export const NotesPage: React.FC = () => {
           className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all"
         >
           <Plus className="h-4 w-4" />
-          <span>New Note</span>
+          <span>Tạo Ghi chú mới</span>
         </button>
       </div>
 
@@ -81,7 +78,7 @@ export const NotesPage: React.FC = () => {
             }`}
           >
             <FileText className="h-4 w-4" />
-            <span>All Notes</span>
+            <span>Tất cả ghi chú</span>
             <span className="ml-1 px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px]">
               {notes.length}
             </span>
@@ -96,7 +93,7 @@ export const NotesPage: React.FC = () => {
             }`}
           >
             <Lock className="h-4 w-4 text-amber-400" />
-            <span>Private Vault</span>
+            <span>Ghi chú riêng tư</span>
             <span className="ml-1 px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px]">
               {notes.filter((n) => n.isPrivate).length}
             </span>
@@ -111,7 +108,7 @@ export const NotesPage: React.FC = () => {
             }`}
           >
             <Share2 className="h-4 w-4 text-indigo-400" />
-            <span>Shared Team</span>
+            <span>Ghi chú dùng chung</span>
             <span className="ml-1 px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px]">
               {notes.filter((n) => !n.isPrivate).length}
             </span>
@@ -126,7 +123,7 @@ export const NotesPage: React.FC = () => {
             }`}
           >
             <Trash2 className="h-4 w-4" />
-            <span>Trash</span>
+            <span>Thùng rác</span>
           </button>
         </div>
 
@@ -138,7 +135,7 @@ export const NotesPage: React.FC = () => {
               type="text"
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
-              placeholder="Filter notes..."
+              placeholder="Lọc ghi chú..."
               className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-background border border-surface-border text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500"
             />
           </div>
@@ -150,10 +147,10 @@ export const NotesPage: React.FC = () => {
               onChange={(e) => setFilterPriority(e.target.value)}
               className="bg-transparent text-xs text-slate-300 focus:outline-none"
             >
-              <option value="all">All Priorities</option>
-              <option value="P1">P1 • High</option>
-              <option value="P2">P2 • Medium</option>
-              <option value="P3">P3 • Low</option>
+              <option value="all">Tất cả độ ưu tiên</option>
+              <option value="P1">P1 • Ưu tiên cao</option>
+              <option value="P2">P2 • Trung bình</option>
+              <option value="P3">P3 • Thấp</option>
             </select>
           </div>
         </div>
@@ -165,15 +162,15 @@ export const NotesPage: React.FC = () => {
           <div className="h-12 w-12 rounded-2xl bg-slate-800 text-slate-400 flex items-center justify-center mx-auto">
             <FileText className="h-6 w-6" />
           </div>
-          <h3 className="text-base font-bold text-white">No Notes Found</h3>
+          <h3 className="text-base font-bold text-white">Không tìm thấy Ghi chú</h3>
           <p className="text-xs text-slate-400 max-w-sm mx-auto">
-            There are no notes matching your active tab or search filter. Create a new note to get started!
+            Không có ghi chú nào phù hợp với bộ lọc tìm kiếm hiện tại. Hãy tạo ghi chú mới ngay!
           </p>
           <button
             onClick={handleCreateNote}
             className="py-2 px-4 rounded-xl bg-indigo-600 text-white text-xs font-semibold"
           >
-            Create New Note
+            Tạo Ghi chú mới
           </button>
         </div>
       ) : (
@@ -194,7 +191,7 @@ export const NotesPage: React.FC = () => {
                     }`}
                   >
                     {note.isPrivate ? <Lock className="h-3 w-3" /> : <Share2 className="h-3 w-3" />}
-                    {note.isPrivate ? 'Private' : 'Shared'}
+                    {note.isPrivate ? 'Riêng tư' : 'Dùng chung'}
                   </span>
 
                   <div className="flex items-center gap-2">
@@ -223,8 +220,8 @@ export const NotesPage: React.FC = () => {
               <div className="mt-5 pt-3 border-t border-surface-border/50 flex items-center justify-between text-xs text-slate-400">
                 <span className="text-[11px] text-slate-400">
                   {note.checklist.length > 0
-                    ? `${note.checklist.filter((c) => c.completed).length}/${note.checklist.length} Tasks`
-                    : new Date(note.updatedAt).toLocaleDateString()}
+                    ? `${note.checklist.filter((c) => c.completed).length}/${note.checklist.length} Công việc`
+                    : new Date(note.updatedAt).toLocaleDateString('vi-VN')}
                 </span>
                 {!note.isPrivate && <AvatarStack members={note.members} />}
               </div>

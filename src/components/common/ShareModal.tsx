@@ -19,7 +19,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteTit
   const handleSendInvite = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
-    alert(`Invitation sent to ${email} with ${permission} permission!`);
+    alert(`Đã gửi lời mời tới ${email} với quyền ${permission === 'edit' ? 'Chỉnh sửa' : 'Xem'}!`);
     setEmail('');
   };
 
@@ -38,7 +38,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteTit
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label="Share Work Note"
+        aria-label="Chia sẻ ghi chú công việc"
         className="w-full max-w-lg bg-surface border border-surface-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
       >
         {/* Header */}
@@ -48,11 +48,15 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteTit
               <UserPlus className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white leading-tight">Share Work Note</h3>
-              <p className="text-xs text-slate-400">{noteTitle || 'Invite collaborators to workspace'}</p>
+              <h3 className="text-base font-bold text-white leading-tight">Chia sẻ Ghi chú Công việc</h3>
+              <p className="text-xs text-slate-400">{noteTitle || 'Mời thành viên vào không gian làm việc'}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1 rounded-lg text-slate-400 hover:text-white transition-colors">
+          <button
+            onClick={onClose}
+            aria-label="Đóng"
+            className="p-1 rounded-lg text-slate-400 hover:text-white transition-colors"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -61,29 +65,29 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteTit
         <div className="p-6 space-y-6">
           {/* Invite Form */}
           <form onSubmit={handleSendInvite} className="space-y-3">
-            <label className="text-xs font-semibold text-slate-300">Invite member by email</label>
+            <label className="text-xs font-semibold text-slate-300">Mời thành viên qua Email</label>
             <div className="flex gap-2">
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="colleague@tasknest.io"
-                className="flex-1 px-3.5 py-2.5 rounded-xl bg-background border border-surface-border text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                placeholder="dongnghiep@tasknest.io"
+                className="flex-1 px-3.5 py-2.5 rounded-xl bg-background border border-surface-border text-white text-xs focus:outline-none focus:border-indigo-500 transition-colors"
               />
               <select
                 value={permission}
                 onChange={(e) => setPermission(e.target.value as MemberPermission)}
                 className="px-3 py-2.5 rounded-xl bg-background border border-surface-border text-slate-300 text-xs font-medium focus:outline-none focus:border-indigo-500"
               >
-                <option value="edit">Can Edit</option>
-                <option value="view">Can View</option>
+                <option value="edit">Có quyền sửa</option>
+                <option value="view">Có quyền xem</option>
               </select>
               <button
                 type="submit"
                 className="py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all"
               >
-                Invite
+                Gửi lời mời
               </button>
             </div>
           </form>
@@ -91,7 +95,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteTit
           {/* Members List */}
           <div>
             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Team Members ({MOCK_USERS.length})
+              Thành viên nhóm ({MOCK_USERS.length})
             </h4>
             <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
               {MOCK_USERS.map((user, idx) => (
@@ -104,7 +108,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteTit
                     </div>
                   </div>
                   <span className="text-xs text-slate-400 font-medium px-2 py-0.5 rounded bg-slate-800 border border-slate-700">
-                    {idx === 0 ? 'Owner' : idx % 2 === 0 ? 'Can Edit' : 'Can View'}
+                    {idx === 0 ? 'Chủ sở hữu' : idx % 2 === 0 ? 'Có quyền sửa' : 'Có quyền xem'}
                   </span>
                 </div>
               ))}
@@ -115,14 +119,14 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteTit
           <div className="pt-2 border-t border-surface-border flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs text-slate-400">
               <Shield className="h-4 w-4 text-emerald-400" />
-              <span>Only invited team members can view this note</span>
+              <span>Chỉ thành viên được mời mới có thể xem ghi chú này</span>
             </div>
             <button
               onClick={handleCopyLink}
               className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg bg-surface-hover text-slate-200 hover:text-white text-xs font-medium border border-surface-border transition-colors"
             >
               {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-              <span>{copied ? 'Copied Link' : 'Copy Link'}</span>
+              <span>{copied ? 'Đã chép link' : 'Sao chép link'}</span>
             </button>
           </div>
         </div>

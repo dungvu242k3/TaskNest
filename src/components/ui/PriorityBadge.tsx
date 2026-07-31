@@ -23,11 +23,11 @@ export const PriorityBadge: React.FC<PriorityBadgeProps> = ({ priority, classNam
   const getLabel = () => {
     switch (priority) {
       case 'P1':
-        return 'P1 • High';
+        return 'P1 • Cao';
       case 'P2':
-        return 'P2 • Medium';
+        return 'P2 • Trung bình';
       case 'P3':
-        return 'P3 • Low';
+        return 'P3 • Thấp';
       default:
         return priority;
     }
@@ -35,7 +35,7 @@ export const PriorityBadge: React.FC<PriorityBadgeProps> = ({ priority, classNam
 
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border ${getBadgeStyle()} ${className}`}
+      className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold border ${getBadgeStyle()} ${className}`}
     >
       {getLabel()}
     </span>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Users, Mail, Activity, Shield, UserPlus, CheckCircle2 } from 'lucide-react';
+import { Users, Mail, Activity, UserPlus, CheckCircle2 } from 'lucide-react';
 import { MOCK_USERS, MOCK_ACTIVITIES } from '../constants/mockData';
 
 interface TeamPageProps {
@@ -20,9 +20,9 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
       {/* Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Team & Collaboration</h1>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Quản lý Nhóm & Hợp tác</h1>
           <p className="text-xs text-slate-400 mt-1">
-            Manage your team members (~10 users), pending invites, and active collaboration audit log.
+            Quản lý danh sách các thành viên trong nhóm (~10 người), danh sách lời mời và nhật ký hợp tác.
           </p>
         </div>
 
@@ -32,7 +32,7 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
             className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all"
           >
             <UserPlus className="h-4 w-4" />
-            <span>Invite Team Member</span>
+            <span>Mời thành viên mới</span>
           </button>
         )}
       </div>
@@ -46,7 +46,7 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
           }`}
         >
           <Users className="h-4 w-4" />
-          <span>Members ({MOCK_USERS.length})</span>
+          <span>Thành viên nhóm ({MOCK_USERS.length})</span>
         </button>
 
         <button
@@ -56,7 +56,7 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
           }`}
         >
           <Mail className="h-4 w-4" />
-          <span>Pending Invitations (1)</span>
+          <span>Lời mời đang chờ (1)</span>
         </button>
 
         <button
@@ -66,7 +66,7 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
           }`}
         >
           <Activity className="h-4 w-4" />
-          <span>Activity Audit Log</span>
+          <span>Nhật ký hoạt động</span>
         </button>
       </div>
 
@@ -76,10 +76,10 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
           <table className="w-full text-left text-xs">
             <thead className="bg-surface-hover/50 text-slate-400 uppercase tracking-wider font-semibold border-b border-surface-border">
               <tr>
-                <th className="p-4">Member Name</th>
-                <th className="p-4">Email</th>
-                <th className="p-4">Role</th>
-                <th className="p-4">Status</th>
+                <th className="p-4">Họ và tên</th>
+                <th className="p-4">Địa chỉ Email</th>
+                <th className="p-4">Vai trò</th>
+                <th className="p-4">Trạng thái</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border/50 text-slate-200">
@@ -92,12 +92,12 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
                   <td className="p-4 text-slate-400 font-mono">{user.email}</td>
                   <td className="p-4">
                     <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-medium">
-                      {idx === 0 ? 'Admin / Owner' : 'Member'}
+                      {idx === 0 ? 'Quản trị viên / Chủ nhóm' : 'Thành viên'}
                     </span>
                   </td>
                   <td className="p-4">
                     <span className="inline-flex items-center gap-1.5 text-emerald-400 font-medium">
-                      <CheckCircle2 className="h-3.5 w-3.5" /> Active
+                      <CheckCircle2 className="h-3.5 w-3.5" /> Đang hoạt động
                     </span>
                   </td>
                 </tr>
@@ -110,19 +110,19 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
       {/* Tab 2: Pending Invitations */}
       {currentTab === 'invites' && (
         <div className="glass-panel p-6 rounded-3xl space-y-4">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider">Pending Team Invitations</h3>
+          <h3 className="text-xs font-bold text-white uppercase tracking-wider">Danh sách lời mời đang chờ xử lý</h3>
           <div className="p-4 rounded-2xl bg-background/50 border border-surface-border flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/30">
                 <Mail className="h-5 w-5" />
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-slate-200">jessica.m@company.com</h4>
-                <p className="text-xs text-slate-400">Invited by Alex Vance as Editor • Sent 2 days ago</p>
+                <h4 className="text-xs font-semibold text-slate-200">trinh.nguyen@company.com</h4>
+                <p className="text-[11px] text-slate-400">Được mời bởi Dũng Vũ với quyền Chỉnh sửa • Gửi 2 ngày trước</p>
               </div>
             </div>
             <button className="py-1.5 px-3 rounded-lg bg-red-500/15 text-red-400 border border-red-500/30 text-xs font-semibold hover:bg-red-500/25">
-              Revoke Invite
+              Thu hồi lời mời
             </button>
           </div>
         </div>
@@ -131,7 +131,7 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
       {/* Tab 3: Activity Audit Log */}
       {currentTab === 'activity' && (
         <div className="glass-panel p-6 rounded-3xl space-y-4">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider">Team Activity Audit Log</h3>
+          <h3 className="text-xs font-bold text-white uppercase tracking-wider">Nhật ký hoạt động nhóm</h3>
           <div className="space-y-3">
             {MOCK_ACTIVITIES.map((act) => (
               <div key={act.id} className="flex items-center justify-between p-3.5 rounded-2xl bg-background/50 border border-surface-border/50 text-xs">
@@ -143,7 +143,7 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
                     <span className="font-medium text-indigo-300">"{act.noteTitle}"</span>
                   </div>
                 </div>
-                <span className="text-[11px] text-slate-400 font-mono">{act.timestamp}</span>
+                <span className="text-[10px] text-slate-400 font-mono">{act.timestamp}</span>
               </div>
             ))}
           </div>

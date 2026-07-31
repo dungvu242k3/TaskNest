@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, FileText, Lock, Share2, Plus, Users, Settings, X } from 'lucide-react';
+import { Search, Lock, Share2, Plus, X } from 'lucide-react';
 import { useAppStore } from '../../hooks/useAppStore';
 
 export const CommandPalette: React.FC = () => {
@@ -8,7 +8,6 @@ export const CommandPalette: React.FC = () => {
   const { isCommandPaletteOpen, setCommandPaletteOpen, notes, setQuickPeekNoteId, addNote } = useAppStore();
   const [query, setQuery] = useState('');
 
-  // Handle Cmd+K / Ctrl+K keyboard shortcut
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -38,7 +37,7 @@ export const CommandPalette: React.FC = () => {
   };
 
   const handleCreateNewNote = (isPrivate: boolean) => {
-    const newNote = addNote('Untitled Note', isPrivate);
+    const newNote = addNote('Ghi chú chưa đặt tên', isPrivate);
     setCommandPaletteOpen(false);
     navigate(`/notes/${newNote.id}`);
   };
@@ -52,7 +51,7 @@ export const CommandPalette: React.FC = () => {
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label="Command Palette"
+        aria-label="Thanh điều hướng lệnh"
         className="w-full max-w-2xl bg-surface border border-surface-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
       >
         {/* Search Header */}
@@ -63,11 +62,12 @@ export const CommandPalette: React.FC = () => {
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Type a command or search notes..."
-            className="flex-1 bg-transparent text-white placeholder-slate-400 focus:outline-none text-base font-medium"
+            placeholder="Gõ lệnh hoặc tìm kiếm ghi chú..."
+            className="flex-1 bg-transparent text-white placeholder-slate-400 focus:outline-none text-sm font-medium"
           />
           <button
             onClick={() => setCommandPaletteOpen(false)}
+            aria-label="Đóng"
             className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           >
             <X className="h-5 w-5" />
@@ -80,28 +80,28 @@ export const CommandPalette: React.FC = () => {
           {!query && (
             <div>
               <div className="px-3 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                Quick Actions
+                Thao tác nhanh
               </div>
               <div className="space-y-1 mt-1">
                 <button
                   onClick={() => handleCreateNewNote(true)}
-                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-amber-500/10 text-amber-300 transition-colors text-sm font-medium text-left"
+                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-amber-500/10 text-amber-300 transition-colors text-xs font-medium text-left"
                 >
                   <div className="flex items-center gap-3">
                     <Lock className="h-4 w-4" />
-                    <span>Create Private Work Note</span>
+                    <span>Tạo Ghi chú Riêng tư mới</span>
                   </div>
-                  <span className="text-xs text-slate-500 font-mono">Shortcut</span>
+                  <span className="text-[10px] text-slate-500 font-mono">Phím tắt</span>
                 </button>
                 <button
                   onClick={() => handleCreateNewNote(false)}
-                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-indigo-500/10 text-indigo-300 transition-colors text-sm font-medium text-left"
+                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-indigo-500/10 text-indigo-300 transition-colors text-xs font-medium text-left"
                 >
                   <div className="flex items-center gap-3">
                     <Plus className="h-4 w-4" />
-                    <span>Create Shared Team Note</span>
+                    <span>Tạo Ghi chú Nhóm mới</span>
                   </div>
-                  <span className="text-xs text-slate-500 font-mono">Shortcut</span>
+                  <span className="text-[10px] text-slate-500 font-mono">Phím tắt</span>
                 </button>
               </div>
             </div>
@@ -110,11 +110,11 @@ export const CommandPalette: React.FC = () => {
           {/* Search Notes Results */}
           <div>
             <div className="px-3 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              {query ? `Search Results (${filteredNotes.length})` : 'Recent Notes'}
+              {query ? `Kết quả tìm kiếm (${filteredNotes.length})` : 'Ghi chú gần đây'}
             </div>
             <div className="space-y-1 mt-1">
               {filteredNotes.length === 0 ? (
-                <p className="px-3 py-4 text-sm text-slate-400 text-center">No notes found matching "{query}"</p>
+                <p className="px-3 py-4 text-xs text-slate-400 text-center">Không tìm thấy ghi chú phù hợp với "{query}"</p>
               ) : (
                 filteredNotes.map((note) => (
                   <button
@@ -129,14 +129,14 @@ export const CommandPalette: React.FC = () => {
                         <Share2 className="h-4 w-4 text-indigo-400 shrink-0" />
                       )}
                       <div className="truncate">
-                        <div className="text-sm font-medium text-slate-200 group-hover:text-white truncate">
+                        <div className="text-xs font-semibold text-slate-200 group-hover:text-white truncate">
                           {note.title}
                         </div>
-                        <div className="text-xs text-slate-400 truncate">{note.content}</div>
+                        <div className="text-[11px] text-slate-400 truncate">{note.content}</div>
                       </div>
                     </div>
-                    <span className="text-xs font-mono text-slate-400 shrink-0 ml-2">
-                      {note.isPrivate ? 'Private' : 'Shared'}
+                    <span className="text-[10px] font-mono text-slate-400 shrink-0 ml-2">
+                      {note.isPrivate ? 'Riêng tư' : 'Dùng chung'}
                     </span>
                   </button>
                 ))
@@ -146,12 +146,12 @@ export const CommandPalette: React.FC = () => {
         </div>
 
         {/* Footer info */}
-        <div className="px-4 py-2.5 bg-background/50 border-t border-surface-border text-xs text-slate-400 flex items-center justify-between">
+        <div className="px-4 py-2.5 bg-background/50 border-t border-surface-border text-[11px] text-slate-400 flex items-center justify-between">
           <span>
-            Use <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">↑</kbd>{' '}
-            <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">↓</kbd> to navigate
+            Dùng phím <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">↑</kbd>{' '}
+            <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">↓</kbd> để di chuyển
           </span>
-          <span>Press ESC to exit</span>
+          <span>Nhấn ESC để thoát</span>
         </div>
       </div>
     </div>

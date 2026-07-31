@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Lock, Share2, UserPlus, Check, Plus, Trash2, Calendar, Sparkles } from 'lucide-react';
+import { ArrowLeft, Lock, Share2, UserPlus, Trash2, Sparkles } from 'lucide-react';
 import { useAppStore } from '../hooks/useAppStore';
 import { PriorityBadge } from '../components/ui/PriorityBadge';
 import { AvatarStack } from '../components/ui/AvatarStack';
@@ -22,14 +22,14 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
   const [isPrivate, setIsPrivate] = useState(note?.isPrivate ?? true);
   const [priority, setPriority] = useState<PriorityLevel>(note?.priority || 'P2');
   const [newChecklistText, setNewChecklistText] = useState('');
-  const [savedStatus, setSavedStatus] = useState('Saved to Supabase');
+  const [savedStatus, setSavedStatus] = useState('Đã lưu vào Supabase');
 
   if (!note) {
     return (
       <div className="p-12 text-center text-slate-400 space-y-4">
-        <h2 className="text-xl font-bold text-white">Note Not Found</h2>
+        <h2 className="text-xl font-bold text-white">Không tìm thấy Ghi chú</h2>
         <button onClick={() => navigate('/notes')} className="py-2 px-4 rounded-xl bg-indigo-600 text-white text-xs font-semibold">
-          Return to Notes
+          Quay lại danh sách
         </button>
       </div>
     );
@@ -39,16 +39,16 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
     const val = e.target.value;
     setTitle(val);
     updateNote(note.id, { title: val });
-    setSavedStatus('Saving changes...');
-    setTimeout(() => setSavedStatus('Saved 1s ago'), 800);
+    setSavedStatus('Đang lưu thay đổi...');
+    setTimeout(() => setSavedStatus('Đã lưu 1 giây trước'), 800);
   };
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const val = e.target.value;
     setContent(val);
     updateNote(note.id, { content: val });
-    setSavedStatus('Saving changes...');
-    setTimeout(() => setSavedStatus('Saved 1s ago'), 800);
+    setSavedStatus('Đang lưu thay đổi...');
+    setTimeout(() => setSavedStatus('Đã lưu 1 giây trước'), 800);
   };
 
   const handleTogglePrivate = () => {
@@ -70,7 +70,7 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
   };
 
   const handleDelete = () => {
-    if (confirm('Are you sure you want to delete this note?')) {
+    if (confirm('Bạn có chắc chắn muốn xóa ghi chú này không?')) {
       deleteNote(note.id);
       navigate('/notes');
     }
@@ -85,7 +85,7 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
           className="flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          <span>Back to Notes</span>
+          <span>Quay lại danh sách</span>
         </button>
 
         <div className="flex items-center gap-3">
@@ -99,7 +99,7 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
             }`}
           >
             {isPrivate ? <Lock className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
-            <span>{isPrivate ? 'Private Note' : 'Shared Note'}</span>
+            <span>{isPrivate ? 'Ghi chú Riêng tư' : 'Ghi chú Dùng chung'}</span>
           </button>
 
           {/* Share Button */}
@@ -109,14 +109,15 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
               className="flex items-center gap-1.5 py-1.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all"
             >
               <UserPlus className="h-3.5 w-3.5" />
-              <span>Share</span>
+              <span>Chia sẻ</span>
             </button>
           )}
 
           <button
             onClick={handleDelete}
+            aria-label="Xóa ghi chú"
+            title="Xóa ghi chú"
             className="p-2 rounded-xl text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-            title="Delete Note"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -134,9 +135,9 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
               onChange={(e) => handlePriorityChange(e.target.value as PriorityLevel)}
               className="bg-background text-xs text-slate-300 px-2 py-1 rounded-lg border border-surface-border focus:outline-none"
             >
-              <option value="P1">Priority: P1 High</option>
-              <option value="P2">Priority: P2 Med</option>
-              <option value="P3">Priority: P3 Low</option>
+              <option value="P1">Độ ưu tiên: P1 Cao</option>
+              <option value="P2">Độ ưu tiên: P2 Trung bình</option>
+              <option value="P3">Độ ưu tiên: P3 Thấp</option>
             </select>
           </div>
 
@@ -153,7 +154,7 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
           type="text"
           value={title}
           onChange={handleTitleChange}
-          placeholder="Untitled Note..."
+          placeholder="Nhập tiêu đề ghi chú..."
           className="w-full bg-transparent text-2xl sm:text-3xl font-extrabold text-white placeholder-slate-600 focus:outline-none tracking-tight"
         />
 
@@ -162,14 +163,14 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
           rows={10}
           value={content}
           onChange={handleContentChange}
-          placeholder="Type your work note content here..."
+          placeholder="Nhập nội dung chi tiết ghi chú tại đây..."
           className="w-full bg-transparent text-slate-200 placeholder-slate-600 focus:outline-none text-base leading-relaxed resize-none"
         />
 
         {/* Checklist Section */}
         <div className="pt-6 border-t border-surface-border space-y-3">
           <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-            Checklist Tasks ({note.checklist.filter((c) => c.completed).length}/{note.checklist.length})
+            Danh sách công việc ({note.checklist.filter((c) => c.completed).length}/{note.checklist.length})
           </h4>
 
           <div className="space-y-2">
@@ -185,7 +186,7 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
                   onChange={() => {}}
                   className="h-4 w-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500"
                 />
-                <span className={`text-sm ${item.completed ? 'line-through text-slate-400' : 'text-slate-200'}`}>
+                <span className={`text-xs ${item.completed ? 'line-through text-slate-400' : 'text-slate-200'}`}>
                   {item.text}
                 </span>
               </div>
@@ -198,14 +199,14 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
               type="text"
               value={newChecklistText}
               onChange={(e) => setNewChecklistText(e.target.value)}
-              placeholder="Add a new checklist task..."
+              placeholder="Thêm một công việc mới..."
               className="flex-1 px-3.5 py-2 rounded-xl bg-background border border-surface-border text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500"
             />
             <button
               type="submit"
               className="py-2 px-3.5 rounded-xl bg-surface-hover text-slate-200 hover:text-white border border-surface-border text-xs font-semibold"
             >
-              Add Task
+              Thêm công việc
             </button>
           </form>
         </div>
