@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Plus, Lock, Share2, Sparkles, Calendar } from 'lucide-react';
 import { useAppStore } from '../../hooks/useAppStore';
+import { PrioritySelect } from '../ui/PrioritySelect';
 import { PriorityLevel } from '../../types';
 
 interface CreateNoteModalProps {
@@ -154,15 +155,10 @@ export const CreateNoteModal: React.FC<CreateNoteModalProps> = ({ isOpen, onClos
               <label className="text-xs font-semibold text-slate-300 block mb-1.5">
                 Mức độ Ưu tiên
               </label>
-              <select
-                value={priority}
-                onChange={(e) => setPriority(e.target.value as PriorityLevel)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-background border border-surface-border text-slate-200 text-xs font-medium focus:outline-none focus:border-indigo-500 transition-colors"
-              >
-                <option value="P1">P1 • Cao (High)</option>
-                <option value="P2">P2 • Trung bình (Medium)</option>
-                <option value="P3">P3 • Thấp (Low)</option>
-              </select>
+              <PrioritySelect
+                priority={priority}
+                onChange={(p) => setPriority(p)}
+              />
             </div>
 
             {/* Due Date Picker */}

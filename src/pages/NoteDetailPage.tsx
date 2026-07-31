@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '../hooks/useAppStore';
 import { PriorityBadge } from '../components/ui/PriorityBadge';
+import { PrioritySelect } from '../components/ui/PrioritySelect';
 import { AvatarStack } from '../components/ui/AvatarStack';
 import { PriorityLevel } from '../types';
 
@@ -331,15 +332,10 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
                 <label className="text-xs text-slate-400 font-medium">Mức độ ưu tiên</label>
                 <PriorityBadge priority={priority} />
               </div>
-              <select
-                value={priority}
-                onChange={(e) => handlePriorityChange(e.target.value as PriorityLevel)}
-                className="w-full bg-background/60 text-xs text-slate-300 px-3.5 py-2.5 rounded-xl border border-surface-border/60 focus:outline-none focus:border-indigo-500/80 transition-colors"
-              >
-                <option value="P1">Cao</option>
-                <option value="P2">Trung bình</option>
-                <option value="P3">Thấp</option>
-              </select>
+              <PrioritySelect
+                priority={priority}
+                onChange={handlePriorityChange}
+              />
             </div>
 
             {/* Due Date */}
