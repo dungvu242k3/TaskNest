@@ -376,7 +376,14 @@ export const useAppStore = create<AppState>()(
           status: item.status || 'pending',
           createdAt: item.created_at || new Date().toISOString(),
         }));
-        set({ invitations: mapped });
+
+        set((state) => {
+          const remoteIds = new Set(mapped.map((m) => m.id));
+          const unsyncedLocal = state.invitations.filter(
+            (inv) => !remoteIds.has(inv.id) && inv.status === 'pending'
+          );
+          return { invitations: [...mapped, ...unsyncedLocal] };
+        });
       }
     } catch (err) {
       console.warn('Supabase fetch invitations notice:', err);
@@ -420,14 +427,26 @@ export const useAppStore = create<AppState>()(
         };
         if (noteId) payload.note_id = noteId;
 
-        const { data, error } = await supabase
+        let { data, error } = await supabase
           .from('team_invitations')
           .insert(payload)
           .select()
           .single();
 
-        if (error) throw error;
-        if (data) {
+        if (error && error.message?.includes('note_id')) {
+          delete payload.note_id;
+          const retry = await supabase
+            .from('team_invitations')
+            .insert(payload)
+            .select()
+            .single();
+          data = retry.data;
+          error = retry.error;
+        }
+
+        if (error) {
+          console.error('Supabase send invitation error:', error);
+        } else if (data) {
           set((state) => ({
             invitations: state.invitations.map((i) =>
               i.id === newInvite.id ? { ...i, id: data.id } : i
