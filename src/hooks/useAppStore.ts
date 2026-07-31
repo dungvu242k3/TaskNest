@@ -164,8 +164,12 @@ export const useAppStore = create<AppState>()(
         }));
         set({ notes: mappedNotes });
       }
-    } catch (err) {
-      console.warn('Supabase fetch notes fallback to local state:', err);
+    } catch (err: any) {
+      if (err?.code === '42P17') {
+        console.info('Supabase RLS notice: infinite recursion detected in notes policy. Using local state.');
+      } else {
+        console.warn('Supabase fetch notes fallback to local state:', err?.message || err);
+      }
     } finally {
       set({ isLoadingSupabase: false });
     }
@@ -174,8 +178,15 @@ export const useAppStore = create<AppState>()(
   // 2. Fetch Dashboard Analytics Metrics via Supabase RPC Stored Function
   fetchDashboardMetricsFromSupabase: async (userId) => {
     if (!isSupabaseConfigured) return null;
+    const targetUserId = userId || get().currentUser?.id || CURRENT_USER.id;
+
+    // UUID Guard: Prevent 400 Bad Request (code 22P02) when using mock user IDs like "usr-1"
+    const isValidUUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(targetUserId);
+    if (!isValidUUID) {
+      return null;
+    }
+
     try {
-      const targetUserId = userId || CURRENT_USER.id;
       const { data, error } = await supabase.rpc('get_user_dashboard_metrics', {
         p_user_id: targetUserId,
       });

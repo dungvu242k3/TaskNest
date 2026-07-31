@@ -62,7 +62,18 @@ CREATE OR REPLACE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- 5. RLS Policies for PROFILES
+-- 5. Helper Security Definer Functions (Bypasses RLS to avoid policy recursion loops)
+CREATE OR REPLACE FUNCTION public.is_note_owner(p_note_id UUID, p_user_id UUID)
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.notes
+    WHERE id = p_note_id AND owner_id = p_user_id
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 6. RLS Policies for PROFILES
 DROP POLICY IF EXISTS "Public profiles are viewable by authenticated users" ON public.profiles;
 CREATE POLICY "Public profiles are viewable by authenticated users"
 ON public.profiles FOR SELECT
@@ -75,7 +86,7 @@ ON public.profiles FOR UPDATE
 TO authenticated
 USING (auth.uid() = id);
 
--- 6. RLS Policies for NOTES
+-- 7. RLS Policies for NOTES
 DROP POLICY IF EXISTS "Users can view own notes or invited shared notes" ON public.notes;
 CREATE POLICY "Users can view own notes or invited shared notes"
 ON public.notes FOR SELECT
@@ -112,15 +123,13 @@ ON public.notes FOR DELETE
 TO authenticated
 USING (owner_id = auth.uid());
 
--- 7. RLS Policies for NOTE_MEMBERS
+-- 8. RLS Policies for NOTE_MEMBERS (Using SECURITY DEFINER to break infinite recursion)
 DROP POLICY IF EXISTS "Members can view their own invitations or note members" ON public.note_members;
 CREATE POLICY "Members can view their own invitations or note members"
 ON public.note_members FOR SELECT
 TO authenticated
 USING (
-  user_id = auth.uid() OR note_id IN (
-    SELECT id FROM public.notes WHERE owner_id = auth.uid()
-  )
+  user_id = auth.uid() OR public.is_note_owner(note_id, auth.uid())
 );
 
 DROP POLICY IF EXISTS "Note owners can manage note members" ON public.note_members;
@@ -128,5 +137,5 @@ CREATE POLICY "Note owners can manage note members"
 ON public.note_members FOR ALL
 TO authenticated
 USING (
-  note_id IN (SELECT id FROM public.notes WHERE owner_id = auth.uid())
+  public.is_note_owner(note_id, auth.uid())
 );
