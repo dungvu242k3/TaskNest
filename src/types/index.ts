@@ -49,3 +49,24 @@ export interface TeamActivity {
   noteTitle: string;
   timestamp: string;
 }
+
+export type TeamRole = 'owner' | 'admin' | 'member';
+
+export interface TeamMemberItem {
+  id: string;
+  user: UserProfile;
+  role: TeamRole;
+  joinedAt: string;
+}
+
+export interface Team {
+  id: string;
+  name: string;
+  description?: string;
+  ownerId: string;
+  memberCount: number;
+  members?: TeamMemberItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+

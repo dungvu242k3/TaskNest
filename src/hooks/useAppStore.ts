@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { Note, NoteStatus, PriorityLevel, MemberPermission, UserProfile } from '../types';
+import { Note, NoteStatus, PriorityLevel, MemberPermission, UserProfile, Team } from '../types';
 import { MOCK_NOTES, MOCK_USERS, CURRENT_USER } from '../constants/mockData';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 
@@ -17,6 +17,8 @@ interface DashboardMetrics {
 interface AppState {
   notes: Note[];
   teamMembers: UserProfile[];
+  teams: Team[];
+  activeTeamId: string | null;
   searchQuery: string;
   isCommandPaletteOpen: boolean;
   quickPeekNoteId: string | null;
@@ -38,6 +40,9 @@ interface AppState {
   // Supabase Backend Sync Actions
   fetchNotesFromSupabase: () => Promise<void>;
   fetchProfilesFromSupabase: () => Promise<void>;
+  fetchTeamsFromSupabase: () => Promise<void>;
+  createTeamInSupabase: (name: string, description?: string) => Promise<Team | null>;
+  setActiveTeamId: (teamId: string | null) => void;
   fetchDashboardMetricsFromSupabase: (userId?: string) => Promise<DashboardMetrics | null>;
   subscribeToRealtimeNotes: () => () => void;
 
@@ -60,6 +65,8 @@ export const useAppStore = create<AppState>()(
     (set, get) => ({
   notes: [],
   teamMembers: [],
+  teams: [],
+  activeTeamId: null,
   searchQuery: '',
   isCommandPaletteOpen: false,
   quickPeekNoteId: null,
@@ -81,7 +88,7 @@ export const useAppStore = create<AppState>()(
     } catch (err) {
       console.warn('Supabase logout notice:', err);
     }
-    set({ isLoggedIn: false, currentUser: null });
+    set({ isLoggedIn: false, currentUser: null, teams: [], activeTeamId: null });
   },
   updateUserProfile: (updates) =>
     set((state) => ({
@@ -111,6 +118,7 @@ export const useAppStore = create<AppState>()(
         });
         get().fetchNotesFromSupabase();
         get().fetchProfilesFromSupabase();
+        get().fetchTeamsFromSupabase();
       } else {
         set({ isLoggedIn: false, currentUser: null });
       }
@@ -128,6 +136,7 @@ export const useAppStore = create<AppState>()(
           });
           get().fetchNotesFromSupabase();
           get().fetchProfilesFromSupabase();
+          get().fetchTeamsFromSupabase();
         } else {
           set({ isLoggedIn: false, currentUser: null });
         }
@@ -199,6 +208,112 @@ export const useAppStore = create<AppState>()(
       console.warn('Supabase fetch profiles notice:', err);
     }
   },
+
+  // 1c. Fetch Teams from Supabase DB
+  fetchTeamsFromSupabase: async () => {
+    if (!isSupabaseConfigured) return;
+    try {
+      const { data, error } = await supabase.from('teams').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data) {
+        const mappedTeams: Team[] = data.map((t: any) => ({
+          id: t.id,
+          name: t.name,
+          description: t.description || '',
+          ownerId: t.owner_id,
+          memberCount: 1,
+          createdAt: t.created_at || new Date().toISOString(),
+          updatedAt: t.updated_at || new Date().toISOString(),
+        }));
+        set((state) => ({
+          teams: mappedTeams,
+          activeTeamId: state.activeTeamId || (mappedTeams.length > 0 ? mappedTeams[0].id : null),
+        }));
+      }
+    } catch (err) {
+      console.warn('Supabase fetch teams notice:', err);
+    }
+  },
+
+  // 1d. Create Team in Supabase DB
+  createTeamInSupabase: async (name, description = '') => {
+    if (!name.trim()) return null;
+
+    const tempTeam: Team = {
+      id: `team-${Date.now()}`,
+      name: name.trim(),
+      description: description.trim(),
+      ownerId: get().currentUser?.id || 'usr-local',
+      memberCount: 1,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    set((state) => ({
+      teams: [tempTeam, ...state.teams],
+      activeTeamId: tempTeam.id,
+    }));
+
+    if (isSupabaseConfigured && get().currentUser?.id) {
+      try {
+        const { data, error } = await supabase.rpc('create_team', {
+          p_name: name.trim(),
+          p_description: description.trim(),
+        });
+
+        if (error) {
+          // Direct table fallback if RPC function doesn't exist yet
+          const { data: insertData, error: insertErr } = await supabase
+            .from('teams')
+            .insert({
+              name: name.trim(),
+              description: description.trim(),
+              owner_id: get().currentUser?.id,
+            })
+            .select()
+            .single();
+
+          if (insertErr) throw insertErr;
+          if (insertData) {
+            const created: Team = {
+              id: insertData.id,
+              name: insertData.name,
+              description: insertData.description || '',
+              ownerId: insertData.owner_id,
+              memberCount: 1,
+              createdAt: insertData.created_at,
+              updatedAt: insertData.updated_at,
+            };
+            set((state) => ({
+              teams: state.teams.map((t) => (t.id === tempTeam.id ? created : t)),
+              activeTeamId: created.id,
+            }));
+            return created;
+          }
+        } else if (data) {
+          const created: Team = {
+            id: data.id,
+            name: data.name,
+            description: data.description || '',
+            ownerId: data.owner_id,
+            memberCount: 1,
+            createdAt: data.created_at,
+            updatedAt: data.created_at,
+          };
+          set((state) => ({
+            teams: state.teams.map((t) => (t.id === tempTeam.id ? created : t)),
+            activeTeamId: created.id,
+          }));
+          return created;
+        }
+      } catch (err) {
+        console.warn('Supabase create team notice:', err);
+      }
+    }
+    return tempTeam;
+  },
+
+  setActiveTeamId: (teamId) => set({ activeTeamId: teamId }),
 
   // 2. Fetch Dashboard Analytics Metrics via Supabase RPC Stored Function
   fetchDashboardMetricsFromSupabase: async (userId) => {
