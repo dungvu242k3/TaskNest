@@ -52,6 +52,13 @@ export const NotesPage: React.FC<NotesPageProps> = ({
     );
   }
 
+  // Auto-Sort: Pinned notes ALWAYS float to the very top
+  filteredNotes.sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+  });
+
   const handleTabChange = (tab: string) => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);

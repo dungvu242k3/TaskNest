@@ -168,16 +168,25 @@ export const useAppStore = create<AppState>()(
     }
   },
 
-  // 4. Pin Note with Supabase Sync
+  // 4. Pin Note with Supabase Sync & Auto-Sort to Top
   togglePinNote: async (id) => {
     const targetNote = get().notes.find((n) => n.id === id);
     const newPinned = targetNote ? !targetNote.pinned : false;
 
-    set((state) => ({
-      notes: state.notes.map((note) =>
-        note.id === id ? { ...note, pinned: newPinned } : note
-      ),
-    }));
+    set((state) => {
+      const updatedNotes = state.notes.map((note) =>
+        note.id === id ? { ...note, pinned: newPinned, updatedAt: new Date().toISOString() } : note
+      );
+
+      // Auto-sort: Pinned notes float to the very top
+      updatedNotes.sort((a, b) => {
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      });
+
+      return { notes: updatedNotes };
+    });
 
     if (isSupabaseConfigured) {
       try {
