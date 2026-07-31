@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, UserPlus, Shield, Check, Copy, Users, Clock, Trash2 } from 'lucide-react';
 import { useAppStore } from '../../hooks/useAppStore';
+import { PermissionSelect } from '../ui/PermissionSelect';
 import { MemberPermission } from '../../types';
 
 interface ShareModalProps {
@@ -84,14 +85,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteTit
                 placeholder="dongnghiep@tasknest.io"
                 className="flex-1 px-3.5 py-2.5 rounded-xl bg-background border border-surface-border text-white text-xs focus:outline-none focus:border-indigo-500 transition-colors"
               />
-              <select
-                value={permission}
-                onChange={(e) => setPermission(e.target.value as MemberPermission)}
-                className="px-3 py-2.5 rounded-xl bg-background border border-surface-border text-slate-300 text-xs font-medium focus:outline-none focus:border-indigo-500"
-              >
-                <option value="edit">Có quyền sửa</option>
-                <option value="view">Có quyền xem</option>
-              </select>
+              <PermissionSelect
+                permission={permission}
+                onChange={(p) => setPermission(p)}
+              />
               <button
                 type="submit"
                 className="py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all"
