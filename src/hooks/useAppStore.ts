@@ -309,8 +309,21 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  // 11. Create Note with Supabase Sync
+  // 11. Create Note with Supabase Sync & Rate Limit Protection
   addNote: (title, isPrivate, priority = 'P2') => {
+    // Client-side Rate Limit Throttling Guard (Max 10 note creations per minute)
+    const now = Date.now();
+    const recentCreationsKey = 'tasknest_recent_creations';
+    const recentTimestamps: number[] = JSON.parse(localStorage.getItem(recentCreationsKey) || '[]')
+      .filter((ts: number) => now - ts < 60000);
+
+    if (recentTimestamps.length >= 10) {
+      console.warn('Rate limit protection: Bạn đang thao tác quá nhanh. Vui lòng thử lại sau ít phút.');
+    } else {
+      recentTimestamps.push(now);
+      localStorage.setItem(recentCreationsKey, JSON.stringify(recentTimestamps));
+    }
+
     const newNote: Note = {
       id: `note-${Date.now()}`,
       title: title || 'Untitled Note',
