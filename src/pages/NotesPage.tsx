@@ -27,7 +27,7 @@ export const NotesPage: React.FC<NotesPageProps> = ({
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { notes, togglePinNote, deleteNote } = useAppStore();
+  const { notes, togglePinNote, deleteNote, currentUser } = useAppStore();
 
   const currentTab = searchParams.get('tab') || 'all';
   const [filterPriority, setFilterPriority] = useState<string>('all');
@@ -198,6 +198,7 @@ export const NotesPage: React.FC<NotesPageProps> = ({
             const completedCount = note.checklist.filter((c) => c.completed).length;
             const totalCount = note.checklist.length;
             const percent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+            const isOwner = note.isPrivate || !currentUser?.id || !note.owner?.id || note.owner.id === currentUser.id;
 
             return (
               <div
@@ -234,18 +235,21 @@ export const NotesPage: React.FC<NotesPageProps> = ({
                       >
                         <Pin className="h-3.5 w-3.5" />
                       </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (window.confirm(`Bạn có chắc chắn muốn xóa vĩnh viễn ghi chú "${note.title || 'chưa đặt tên'}"? Dữ liệu sẽ bị xóa hoàn toàn ở cả hệ thống và cơ sở dữ liệu Supabase.`)) {
-                            deleteNote(note.id);
-                          }
-                        }}
-                        className="p-1.5 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/15 hover:border-rose-500/30 border border-transparent transition-all duration-200"
-                        title="Xóa vĩnh viễn ghi chú khỏi DB"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+
+                      {isOwner && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm(`Bạn có chắc chắn muốn xóa vĩnh viễn ghi chú "${note.title || 'chưa đặt tên'}"? Dữ liệu sẽ bị xóa hoàn toàn ở cả hệ thống và cơ sở dữ liệu Supabase.`)) {
+                              deleteNote(note.id);
+                            }
+                          }}
+                          className="p-1.5 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/15 hover:border-rose-500/30 border border-transparent transition-all duration-200"
+                          title="Xóa vĩnh viễn ghi chú khỏi DB"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
                     </div>
                   </div>
 

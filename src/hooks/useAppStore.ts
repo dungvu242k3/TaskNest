@@ -746,8 +746,19 @@ export const useAppStore = create<AppState>()(
     return newNote;
   },
 
-  // 12. Delete Note with Supabase Sync
+  // 12. Delete Note with Supabase Sync (Owner Only Guard)
   deleteNote: async (id) => {
+    const targetNote = get().notes.find((n) => n.id === id);
+    const currUser = get().currentUser;
+
+    // Strict Permission Guard: Shared notes can ONLY be deleted by their creator/owner
+    if (targetNote && !targetNote.isPrivate && targetNote.owner?.id && currUser?.id) {
+      if (targetNote.owner.id !== currUser.id) {
+        alert('Bảo mật: Chỉ người tạo/chủ sở hữu mới có quyền xóa ghi chú chung này.');
+        return;
+      }
+    }
+
     set((state) => ({
       notes: state.notes.filter((n) => n.id !== id),
       quickPeekNoteId: state.quickPeekNoteId === id ? null : state.quickPeekNoteId,

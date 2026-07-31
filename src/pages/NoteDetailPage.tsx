@@ -37,9 +37,11 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
     updateChecklistItem,
     updateMemberPermission,
     deleteNote,
+    currentUser,
   } = useAppStore();
 
   const note = notes.find((n) => n.id === id);
+  const isOwner = note?.isPrivate || !currentUser?.id || !note?.owner?.id || note.owner.id === currentUser.id;
 
   const [title, setTitle] = useState(note?.title || '');
   const [content, setContent] = useState(note?.content || '');
@@ -397,25 +399,27 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
               </div>
             )}
 
-            {/* Permanent Delete Action Button */}
-            <div className="pt-3 border-t border-surface-border/40">
-              <button
-                onClick={() => {
-                  if (
-                    window.confirm(
-                      `Bạn có chắc chắn muốn xóa vĩnh viễn ghi chú "${title || 'chưa đặt tên'}"? Dữ liệu và toàn bộ checklist sẽ bị xóa hoàn toàn ở cả hệ thống và cơ sở dữ liệu Supabase.`
-                    )
-                  ) {
-                    deleteNote(note.id);
-                    navigate('/notes');
-                  }
-                }}
-                className="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 hover:border-red-500/40 text-xs font-semibold transition-all focus:outline-none"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                <span>Xóa vĩnh viễn ghi chú</span>
-              </button>
-            </div>
+            {/* Permanent Delete Action Button (Owners only) */}
+            {isOwner && (
+              <div className="pt-3 border-t border-surface-border/40">
+                <button
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        `Bạn có chắc chắn muốn xóa vĩnh viễn ghi chú "${title || 'chưa đặt tên'}"? Dữ liệu và toàn bộ checklist sẽ bị xóa hoàn toàn ở cả hệ thống và cơ sở dữ liệu Supabase.`
+                      )
+                    ) {
+                      deleteNote(note.id);
+                      navigate('/notes');
+                    }
+                  }}
+                  className="w-full flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 hover:border-red-500/40 text-xs font-semibold transition-all focus:outline-none"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>Xóa vĩnh viễn ghi chú</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
