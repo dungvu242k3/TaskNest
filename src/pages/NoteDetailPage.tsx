@@ -14,6 +14,7 @@ import {
   Trash2,
   Check,
   X,
+  Circle,
 } from 'lucide-react';
 import { useAppStore } from '../hooks/useAppStore';
 import { PriorityBadge } from '../components/ui/PriorityBadge';
@@ -182,18 +183,32 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
                 return (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-background/50 border border-surface-border/60 hover:border-indigo-500/40 hover:bg-surface-hover/50 transition-all group select-none"
+                    onClick={() => {
+                      if (!isEditing) {
+                        toggleChecklistItem(note.id, item.id);
+                      }
+                    }}
+                    className={`flex items-center justify-between gap-3.5 p-3.5 rounded-2xl border transition-all duration-200 group select-none ${
+                      isEditing
+                        ? 'bg-background/80 border-indigo-500/60 shadow-glow'
+                        : item.completed
+                        ? 'bg-emerald-500/10 border-emerald-500/30 text-slate-400 shadow-glow-emerald cursor-pointer'
+                        : 'bg-surface/30 border-surface-border/50 hover:border-indigo-500/40 hover:bg-surface-hover/50 text-slate-200 cursor-pointer'
+                    }`}
                   >
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <input
-                        type="checkbox"
-                        checked={item.completed}
-                        onChange={() => toggleChecklistItem(note.id, item.id)}
-                        className="h-4 w-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 focus:outline-none shrink-0 cursor-pointer"
-                      />
+                    <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                      {!isEditing &&
+                        (item.completed ? (
+                          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 transition-all duration-200 scale-110" />
+                        ) : (
+                          <Circle className="h-4 w-4 text-slate-500 group-hover:text-indigo-400 shrink-0 transition-colors duration-200" />
+                        ))}
 
                       {isEditing ? (
-                        <div className="flex items-center gap-2 flex-1">
+                        <div
+                          className="flex items-center gap-2 flex-1"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <input
                             type="text"
                             value={editingItemText}
@@ -222,9 +237,10 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
                         </div>
                       ) : (
                         <span
-                          onClick={() => toggleChecklistItem(note.id, item.id)}
-                          className={`text-xs sm:text-sm cursor-pointer flex-1 truncate ${
-                            item.completed ? 'line-through text-slate-500' : 'text-slate-200 font-medium'
+                          className={`text-xs sm:text-sm flex-1 truncate transition-all duration-200 ${
+                            item.completed
+                              ? 'line-through text-slate-400/80 font-normal'
+                              : 'text-slate-200 font-medium'
                           }`}
                         >
                           {item.text}
