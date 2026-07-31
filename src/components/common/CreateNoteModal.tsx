@@ -19,13 +19,15 @@ export const CreateNoteModal: React.FC<CreateNoteModalProps> = ({ isOpen, onClos
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const noteTitle = title.trim() || 'Ghi chú chưa đặt tên';
-    const newNote = addNote(noteTitle, isPrivate, priority);
+    const newNote = await addNote(noteTitle, isPrivate, priority);
     setTitle('');
     onClose();
-    navigate(`/notes/${newNote.id}`);
+    if (newNote?.id) {
+      navigate(`/notes/${newNote.id}`);
+    }
   };
 
   return (

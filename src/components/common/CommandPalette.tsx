@@ -36,10 +36,12 @@ export const CommandPalette: React.FC = () => {
     setCommandPaletteOpen(false);
   };
 
-  const handleCreateNewNote = (isPrivate: boolean) => {
-    const newNote = addNote('Ghi chú chưa đặt tên', isPrivate);
+  const handleCreateNewNote = async (isPrivate: boolean) => {
+    const newNote = await addNote('Ghi chú chưa đặt tên', isPrivate);
     setCommandPaletteOpen(false);
-    navigate(`/notes/${newNote.id}`);
+    if (newNote?.id) {
+      navigate(`/notes/${newNote.id}`);
+    }
   };
 
   return (

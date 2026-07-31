@@ -61,7 +61,7 @@ interface AppState {
   updateChecklistItem: (noteId: string, checklistId: string, text: string) => Promise<void>;
   updateMemberPermission: (noteId: string, userId: string, permission: MemberPermission) => Promise<void>;
   removeTeamMember: (userId: string) => Promise<void>;
-  addNote: (title: string, isPrivate: boolean, priority?: PriorityLevel) => Note;
+  addNote: (title: string, isPrivate: boolean, priority?: PriorityLevel) => Promise<Note>;
   deleteNote: (id: string) => Promise<void>;
 }
 
@@ -168,22 +168,35 @@ export const useAppStore = create<AppState>()(
 
       if (error) throw error;
       if (data) {
-        const mappedNotes: Note[] = data.map((item: any) => ({
-          id: item.id,
-          title: item.title,
-          content: item.content || '',
-          isPrivate: item.is_private,
-          status: item.status || 'todo',
-          priority: item.priority || 'P2',
-          dueDate: item.due_date || undefined,
-          tags: item.tags || [],
-          checklist: item.checklist || [],
-          pinned: item.pinned || false,
-          owner: CURRENT_USER,
-          members: [{ user: CURRENT_USER, permission: 'owner', status: 'accepted' }],
-          createdAt: item.created_at || new Date().toISOString(),
-          updatedAt: item.updated_at || new Date().toISOString(),
-        }));
+        const activeUser = get().currentUser || CURRENT_USER;
+        const mappedNotes: Note[] = data.map((item: any) => {
+          const isCurrentUserOwner = item.owner_id === activeUser.id;
+          const ownerObj: UserProfile = isCurrentUserOwner
+            ? activeUser
+            : {
+                id: item.owner_id,
+                fullName: 'Thành viên',
+                email: '',
+                avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
+              };
+
+          return {
+            id: item.id,
+            title: item.title,
+            content: item.content || '',
+            isPrivate: item.is_private,
+            status: item.status || 'todo',
+            priority: item.priority || 'P2',
+            dueDate: item.due_date || undefined,
+            tags: item.tags || [],
+            checklist: item.checklist || [],
+            pinned: item.pinned || false,
+            owner: ownerObj,
+            members: [{ user: ownerObj, permission: 'owner', status: 'accepted' }],
+            createdAt: item.created_at || new Date().toISOString(),
+            updatedAt: item.updated_at || new Date().toISOString(),
+          };
+        });
         set({ notes: mappedNotes });
       }
     } catch (err: any) {
@@ -691,7 +704,7 @@ export const useAppStore = create<AppState>()(
   },
 
   // 11. Create Note with Supabase Sync & Rate Limit Protection
-  addNote: (title, isPrivate, priority = 'P2') => {
+  addNote: async (title, isPrivate, priority = 'P2') => {
     // Client-side Rate Limit Throttling Guard (Max 5 note creations per minute)
     const now = Date.now();
     const recentCreationsKey = 'tasknest_recent_creations';
@@ -705,45 +718,62 @@ export const useAppStore = create<AppState>()(
       localStorage.setItem(recentCreationsKey, JSON.stringify(recentTimestamps));
     }
 
-    const newNote: Note = {
+    const activeUser = get().currentUser || CURRENT_USER;
+    const isValidUUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(activeUser.id);
+
+    const tempNote: Note = {
       id: `note-${Date.now()}`,
-      title: title || 'Untitled Note',
+      title: title || 'Ghi chú chưa đặt tên',
       content: '',
       isPrivate,
       status: 'todo',
       priority,
       tags: [isPrivate ? 'Personal' : 'Team'],
-      owner: CURRENT_USER,
-      members: [{ user: CURRENT_USER, permission: 'owner', status: 'accepted' }],
+      owner: activeUser,
+      members: [{ user: activeUser, permission: 'owner', status: 'accepted' }],
       checklist: [],
       pinned: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
-    set((state) => ({ notes: [newNote, ...state.notes] }));
+    set((state) => ({ notes: [tempNote, ...state.notes] }));
+
+    let syncedNote = tempNote;
 
     // Async Insert to Supabase DB
-    if (isSupabaseConfigured) {
-      supabase
-        .from('notes')
-        .insert({
-          owner_id: CURRENT_USER.id,
-          title: newNote.title,
-          content: '',
-          is_private: isPrivate,
-          status: 'todo',
-          priority,
-          tags: newNote.tags,
-          checklist: [],
-          pinned: false,
-        })
-        .then(({ data, error }) => {
-          if (error) console.warn('Supabase insert note notice:', error);
-        });
+    if (isSupabaseConfigured && isValidUUID) {
+      try {
+        const { data, error } = await supabase
+          .from('notes')
+          .insert({
+            owner_id: activeUser.id,
+            title: tempNote.title,
+            content: '',
+            is_private: isPrivate,
+            status: 'todo',
+            priority,
+            tags: tempNote.tags,
+            checklist: [],
+            pinned: false,
+          })
+          .select()
+          .single();
+
+        if (error) {
+          console.warn('Supabase insert note notice:', error);
+        } else if (data) {
+          syncedNote = { ...tempNote, id: data.id };
+          set((state) => ({
+            notes: state.notes.map((n) => (n.id === tempNote.id ? syncedNote : n)),
+          }));
+        }
+      } catch (err) {
+        console.warn('Supabase insert note error:', err);
+      }
     }
 
-    return newNote;
+    return syncedNote;
   },
 
   // 12. Delete Note with Supabase Sync (Owner Only Guard)
