@@ -11,12 +11,17 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShareModal }) => {
 
   return (
     <header className="h-16 bg-surface/50 backdrop-blur-md border-b border-surface-border px-6 flex items-center justify-between sticky top-0 z-20">
-      {/* Search Bar / Command Palette Trigger */}
-      <div className="flex items-center gap-3 flex-1 max-w-md">
+      {/* Left Placeholder / Breadcrumb Area */}
+      <div className="hidden md:flex items-center gap-2 text-xs text-slate-400 font-medium w-48">
+        {/* Placeholder to balance centered search bar */}
+      </div>
+
+      {/* Centered Search Bar / Command Palette Trigger */}
+      <div className="flex-1 max-w-md mx-auto flex justify-center">
         <button
           onClick={toggleCommandPalette}
           aria-label="Tìm kiếm hoặc gõ lệnh"
-          className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-background/80 border border-surface-border text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-all text-xs group"
+          className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-background/80 border border-surface-border text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-all text-xs group focus:outline-none"
         >
           <div className="flex items-center gap-2.5">
             <Search className="h-4 w-4 text-slate-400 group-hover:text-indigo-400 transition-colors" />
@@ -28,12 +33,12 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShareModal }) => {
         </button>
       </div>
 
-      {/* Header Actions */}
-      <div className="flex items-center gap-3">
+      {/* Right Header Actions */}
+      <div className="flex items-center justify-end gap-3 w-48">
         {onOpenShareModal && (
           <button
             onClick={onOpenShareModal}
-            className="flex items-center gap-2 py-2 px-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all"
+            className="flex items-center gap-2 py-2 px-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all focus:outline-none"
           >
             <UserPlus className="h-4 w-4" />
             <span>Mời thành viên</span>
@@ -43,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenShareModal }) => {
         {/* Notifications */}
         <button
           aria-label="Thông báo"
-          className="relative p-2 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-surface-hover transition-colors"
+          className="relative p-2 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-surface-hover transition-colors focus:outline-none"
         >
           <Bell className="h-5 w-5" />
           <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
