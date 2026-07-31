@@ -27,7 +27,7 @@ export const NotesPage: React.FC<NotesPageProps> = ({
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { notes, togglePinNote } = useAppStore();
+  const { notes, togglePinNote, deleteNote } = useAppStore();
 
   const currentTab = searchParams.get('tab') || 'all';
   const [filterPriority, setFilterPriority] = useState<string>('all');
@@ -218,7 +218,7 @@ export const NotesPage: React.FC<NotesPageProps> = ({
                       {note.isPrivate ? 'Riêng tư' : 'Ghi chú chung'}
                     </span>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       <PriorityBadge priority={note.priority} />
                       <button
                         onClick={(e) => {
@@ -228,11 +228,23 @@ export const NotesPage: React.FC<NotesPageProps> = ({
                         className={`p-1.5 rounded-xl transition-all duration-200 ${
                           note.pinned
                             ? 'text-amber-400 bg-amber-500/15 border border-amber-500/30'
-                            : 'text-slate-600 hover:text-slate-300 border border-transparent'
+                            : 'text-slate-500 hover:text-slate-300 border border-transparent'
                         }`}
                         title={note.pinned ? 'Bỏ ghim' : 'Ghim bài'}
                       >
                         <Pin className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm(`Bạn có chắc chắn muốn xóa vĩnh viễn ghi chú "${note.title || 'chưa đặt tên'}"? Dữ liệu sẽ bị xóa hoàn toàn ở cả hệ thống và cơ sở dữ liệu Supabase.`)) {
+                            deleteNote(note.id);
+                          }
+                        }}
+                        className="p-1.5 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/15 hover:border-rose-500/30 border border-transparent transition-all duration-200"
+                        title="Xóa vĩnh viễn ghi chú khỏi DB"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   </div>

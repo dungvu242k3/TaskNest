@@ -12,6 +12,8 @@ import {
   Sparkles,
   Activity,
   CheckSquare,
+  Trash2,
+  Pin,
 } from 'lucide-react';
 import { useAppStore } from '../hooks/useAppStore';
 import { PriorityBadge } from '../components/ui/PriorityBadge';
@@ -25,7 +27,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onOpenCreateNoteModal,
 }) => {
   const navigate = useNavigate();
-  const { notes, currentUser, fetchDashboardMetricsFromSupabase } = useAppStore();
+  const { notes, currentUser, fetchDashboardMetricsFromSupabase, togglePinNote, deleteNote } = useAppStore();
 
   useEffect(() => {
     fetchDashboardMetricsFromSupabase();
@@ -197,7 +199,35 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                         {note.isPrivate ? <Lock className="h-3 w-3" /> : <Share2 className="h-3 w-3" />}
                         {note.isPrivate ? 'Riêng tư' : 'Ghi chú chung'}
                       </span>
-                      <PriorityBadge priority={note.priority} />
+                      <div className="flex items-center gap-1.5">
+                        <PriorityBadge priority={note.priority} />
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            togglePinNote(note.id);
+                          }}
+                          className={`p-1.5 rounded-xl transition-all duration-200 ${
+                            note.pinned
+                              ? 'text-amber-400 bg-amber-500/15 border border-amber-500/30'
+                              : 'text-slate-500 hover:text-slate-300 border border-transparent'
+                          }`}
+                          title={note.pinned ? 'Bỏ ghim' : 'Ghim bài'}
+                        >
+                          <Pin className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm(`Bạn có chắc chắn muốn xóa vĩnh viễn ghi chú "${note.title || 'chưa đặt tên'}"? Dữ liệu sẽ bị xóa hoàn toàn ở cả hệ thống và cơ sở dữ liệu Supabase.`)) {
+                              deleteNote(note.id);
+                            }
+                          }}
+                          className="p-1.5 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/15 hover:border-rose-500/30 border border-transparent transition-all duration-200"
+                          title="Xóa vĩnh viễn ghi chú khỏi DB"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </div>
 
                     <h4 className="text-base font-bold text-white group-hover:text-indigo-300 transition-colors line-clamp-1">
