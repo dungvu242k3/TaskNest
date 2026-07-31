@@ -1,0 +1,165 @@
+import { Note, UserProfile, TeamActivity } from '../types';
+
+export const CURRENT_USER: UserProfile = {
+  id: 'usr-1',
+  fullName: 'Alex Vance',
+  email: 'alex.vance@tasknest.io',
+  avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+};
+
+export const MOCK_USERS: UserProfile[] = [
+  CURRENT_USER,
+  {
+    id: 'usr-2',
+    fullName: 'Sarah Jenkins',
+    email: 'sarah.j@tasknest.io',
+    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'usr-3',
+    fullName: 'Michael Chen',
+    email: 'm.chen@tasknest.io',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'usr-4',
+    fullName: 'Elena Rostova',
+    email: 'elena.r@tasknest.io',
+    avatarUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'usr-5',
+    fullName: 'David Kim',
+    email: 'd.kim@tasknest.io',
+    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+  },
+];
+
+export const MOCK_NOTES: Note[] = [
+  {
+    id: 'note-1',
+    title: 'Q3 Product Strategy & Feature Roadmap',
+    content: 'Review key targets for Q3: Implement real-time note sync, refine permission drawer, and finalize client-side offline mode.',
+    isPrivate: false,
+    status: 'in_progress',
+    priority: 'P1',
+    dueDate: '2026-08-05',
+    tags: ['Product', 'Strategy', 'Q3'],
+    owner: CURRENT_USER,
+    members: [
+      { user: CURRENT_USER, permission: 'owner', status: 'accepted' },
+      { user: MOCK_USERS[1], permission: 'edit', status: 'accepted' },
+      { user: MOCK_USERS[2], permission: 'view', status: 'accepted' },
+    ],
+    checklist: [
+      { id: 'c1', text: 'Finalize Supabase DB schema for note sharing', completed: true },
+      { id: 'c2', text: 'Benchmark UI patterns from Linear & Raycast', completed: true },
+      { id: 'c3', text: 'Conduct internal team demo with 5 users', completed: false },
+    ],
+    pinned: true,
+    createdAt: '2026-07-28T09:00:00Z',
+    updatedAt: '2026-07-31T10:30:00Z',
+  },
+  {
+    id: 'note-2',
+    title: 'Personal Weekly Goals & Financial Sync',
+    content: 'Track personal learning milestones: Master React 19 server functions, set up monthly budgeting spreadsheet, schedule annual health checkup.',
+    isPrivate: true,
+    status: 'todo',
+    priority: 'P2',
+    dueDate: '2026-08-02',
+    tags: ['Personal', 'Goals'],
+    owner: CURRENT_USER,
+    members: [{ user: CURRENT_USER, permission: 'owner', status: 'accepted' }],
+    checklist: [
+      { id: 'c4', text: 'Review quarterly savings target', completed: false },
+      { id: 'c5', text: 'Read chapters 3-5 of Clean Code', completed: true },
+    ],
+    pinned: true,
+    createdAt: '2026-07-30T14:15:00Z',
+    updatedAt: '2026-07-30T14:15:00Z',
+  },
+  {
+    id: 'note-3',
+    title: 'Design System & Token Refresh',
+    content: 'Unify color tokens under Editorial Tactile Dark style. Use Obsidian (#0B0F17) background and Indigo (#6366F1) for active states.',
+    isPrivate: false,
+    status: 'completed',
+    priority: 'P2',
+    dueDate: '2026-07-31',
+    tags: ['Design', 'UI/UX'],
+    owner: MOCK_USERS[1],
+    members: [
+      { user: MOCK_USERS[1], permission: 'owner', status: 'accepted' },
+      { user: CURRENT_USER, permission: 'edit', status: 'accepted' },
+    ],
+    checklist: [
+      { id: 'c6', text: 'Define HSL color variables', completed: true },
+      { id: 'c7', text: 'Create atomic Button & Badge components', completed: true },
+    ],
+    pinned: false,
+    createdAt: '2026-07-25T11:00:00Z',
+    updatedAt: '2026-07-31T08:20:00Z',
+  },
+  {
+    id: 'note-4',
+    title: 'Private Journal: Ideas for Next Side Project',
+    content: 'Brainstorming an AI-powered code snippet generator tailored for TypeScript microservices.',
+    isPrivate: true,
+    status: 'todo',
+    priority: 'P3',
+    tags: ['Ideas', 'Draft'],
+    owner: CURRENT_USER,
+    members: [{ user: CURRENT_USER, permission: 'owner', status: 'accepted' }],
+    checklist: [],
+    pinned: false,
+    createdAt: '2026-07-29T18:40:00Z',
+    updatedAt: '2026-07-29T18:40:00Z',
+  },
+  {
+    id: 'note-5',
+    title: 'Supabase Security & RLS Policy Audit',
+    content: 'Audit row level security policies across profiles, notes, and note_members tables to prevent unauthorized access.',
+    isPrivate: false,
+    status: 'in_progress',
+    priority: 'P1',
+    dueDate: '2026-08-08',
+    tags: ['Security', 'Database'],
+    owner: CURRENT_USER,
+    members: [
+      { user: CURRENT_USER, permission: 'owner', status: 'accepted' },
+      { user: MOCK_USERS[3], permission: 'edit', status: 'accepted' },
+    ],
+    checklist: [
+      { id: 'c8', text: 'Write RLS integration tests', completed: false },
+      { id: 'c9', text: 'Verify SELECT isolate on private notes', completed: true },
+    ],
+    pinned: false,
+    createdAt: '2026-07-31T09:10:00Z',
+    updatedAt: '2026-07-31T11:00:00Z',
+  },
+];
+
+export const MOCK_ACTIVITIES: TeamActivity[] = [
+  {
+    id: 'act-1',
+    user: MOCK_USERS[1],
+    action: 'updated checklist on',
+    noteTitle: 'Q3 Product Strategy & Feature Roadmap',
+    timestamp: '10 mins ago',
+  },
+  {
+    id: 'act-2',
+    user: MOCK_USERS[2],
+    action: 'joined as viewer on',
+    noteTitle: 'Supabase Security & RLS Policy Audit',
+    timestamp: '1 hour ago',
+  },
+  {
+    id: 'act-3',
+    user: CURRENT_USER,
+    action: 'created new shared note',
+    noteTitle: 'Design System & Token Refresh',
+    timestamp: '3 hours ago',
+  },
+];
