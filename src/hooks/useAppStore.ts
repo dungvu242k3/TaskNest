@@ -32,6 +32,7 @@ interface AppState {
   setQuickPeekNoteId: (id: string | null) => void;
   login: () => void;
   logout: () => Promise<void>;
+  updateUserProfile: (updates: Partial<UserProfile>) => void;
 
   // Supabase Backend Sync Actions
   fetchNotesFromSupabase: () => Promise<void>;
@@ -69,7 +70,7 @@ export const useAppStore = create<AppState>()(
   setCommandPaletteOpen: (isOpen) => set({ isCommandPaletteOpen: isOpen }),
   toggleCommandPalette: () => set((state) => ({ isCommandPaletteOpen: !state.isCommandPaletteOpen })),
   setQuickPeekNoteId: (id) => set({ quickPeekNoteId: id }),
-  login: () => set({ isLoggedIn: true, currentUser: CURRENT_USER }),
+  login: () => set({ isLoggedIn: true, currentUser: get().currentUser || CURRENT_USER }),
   logout: async () => {
     try {
       if (isSupabaseConfigured) {
@@ -80,6 +81,12 @@ export const useAppStore = create<AppState>()(
     }
     set({ isLoggedIn: false, currentUser: null });
   },
+  updateUserProfile: (updates) =>
+    set((state) => ({
+      currentUser: state.currentUser
+        ? { ...state.currentUser, ...updates }
+        : { ...CURRENT_USER, ...updates },
+    })),
 
   // 1. Fetch Notes from Supabase DB
   fetchNotesFromSupabase: async () => {

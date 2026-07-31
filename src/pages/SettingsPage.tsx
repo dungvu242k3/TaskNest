@@ -1,14 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { User, Sliders, Moon, Bell, Save } from 'lucide-react';
+import { useAppStore } from '../hooks/useAppStore';
 import { CURRENT_USER } from '../constants/mockData';
 
 export const SettingsPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentTab = searchParams.get('tab') || 'profile';
+  const { currentUser, updateUserProfile } = useAppStore();
 
-  const [fullName, setFullName] = React.useState(CURRENT_USER.fullName);
-  const [email, setEmail] = React.useState(CURRENT_USER.email);
+  const [fullName, setFullName] = useState(currentUser?.fullName || CURRENT_USER.fullName);
+  const [email, setEmail] = useState(currentUser?.email || CURRENT_USER.email);
+  const [saveNotice, setSaveNotice] = useState(false);
+
+  useEffect(() => {
+    if (currentUser) {
+      setFullName(currentUser.fullName);
+      setEmail(currentUser.email);
+    }
+  }, [currentUser]);
 
   const handleTabChange = (tab: string) => {
     setSearchParams({ tab });
@@ -16,7 +26,9 @@ export const SettingsPage: React.FC = () => {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Đã lưu cấu hình cài đặt thành công!');
+    updateUserProfile({ fullName, email });
+    setSaveNotice(true);
+    setTimeout(() => setSaveNotice(false), 3000);
   };
 
   return (
@@ -54,7 +66,7 @@ export const SettingsPage: React.FC = () => {
       {currentTab === 'profile' && (
         <form onSubmit={handleSave} className="glass-panel p-6 rounded-3xl space-y-6">
           <div className="flex items-center gap-5 pb-6 border-b border-surface-border">
-            <img src={CURRENT_USER.avatarUrl} alt="Avatar" className="h-16 w-16 rounded-full object-cover ring-4 ring-indigo-500/30" />
+            <img src={currentUser?.avatarUrl || CURRENT_USER.avatarUrl} alt="Avatar" className="h-16 w-16 rounded-full object-cover ring-4 ring-indigo-500/30" />
             <div>
               <h3 className="text-sm font-bold text-white">Ảnh đại diện</h3>
               <p className="text-xs text-slate-400">Định dạng JPG, PNG hoặc GIF. Dung lượng tối đa 2MB.</p>
@@ -82,6 +94,12 @@ export const SettingsPage: React.FC = () => {
               />
             </div>
           </div>
+
+          {saveNotice && (
+            <div className="p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center gap-2">
+              <span>✓ Đã cập nhật thông tin hồ sơ cá nhân thành công!</span>
+            </div>
+          )}
 
           <div className="pt-4 border-t border-surface-border flex justify-end">
             <button

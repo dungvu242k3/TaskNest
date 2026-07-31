@@ -26,7 +26,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onOpenCreateNoteModal,
 }) => {
   const navigate = useNavigate();
-  const { notes, fetchDashboardMetricsFromSupabase } = useAppStore();
+  const { notes, currentUser, fetchDashboardMetricsFromSupabase } = useAppStore();
 
   useEffect(() => {
     fetchDashboardMetricsFromSupabase();
@@ -61,7 +61,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-            Xin chào trở lại, Dũng Vũ 👋
+            Xin chào trở lại, {currentUser?.fullName || 'bạn'} 👋
           </h1>
 
           <p className="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-xl">
