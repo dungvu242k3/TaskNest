@@ -40,15 +40,7 @@ export const App: React.FC = () => {
                   />
                 }
               />
-              <Route
-                path="/notes/:id"
-                element={
-                  <NotesPage
-                    onOpenCreateNoteModal={() => setCreateNoteModalOpen(true)}
-                    onOpenShareModal={() => setShareModalOpen(true)}
-                  />
-                }
-              />
+              <Route path="/notes/:id" element={<NoteDetailPage onOpenShareModal={() => setShareModalOpen(true)} />} />
               <Route path="/team" element={<TeamPage onOpenShareModal={() => setShareModalOpen(true)} />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Routes>
@@ -57,7 +49,6 @@ export const App: React.FC = () => {
 
         {/* Global Modals & Overlay Drawers */}
         <CommandPalette />
-        <QuickPeekDrawer />
         <ShareModal isOpen={isShareModalOpen} onClose={() => setShareModalOpen(false)} />
         <CreateNoteModal isOpen={isCreateNoteModalOpen} onClose={() => setCreateNoteModalOpen(false)} />
       </div>
