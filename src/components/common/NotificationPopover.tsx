@@ -9,9 +9,14 @@ export const NotificationPopover: React.FC = () => {
   const {
     invitations,
     currentUser,
+    fetchInvitationsFromSupabase,
     acceptInvitationInSupabase,
     cancelInvitationInSupabase,
   } = useAppStore();
+
+  useEffect(() => {
+    fetchInvitationsFromSupabase();
+  }, [isOpen, fetchInvitationsFromSupabase]);
 
   const userEmail = currentUser?.email?.toLowerCase() || '';
 

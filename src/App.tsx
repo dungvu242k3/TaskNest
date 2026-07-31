@@ -18,7 +18,7 @@ export const App: React.FC = () => {
   const [isShareModalOpen, setShareModalOpen] = useState(false);
   const [shareModalNoteId, setShareModalNoteId] = useState<string | undefined>(undefined);
   const [isCreateNoteModalOpen, setCreateNoteModalOpen] = useState(false);
-  const { fetchNotesFromSupabase, subscribeToRealtimeNotes, initAuthSession } = useAppStore();
+  const { fetchNotesFromSupabase, fetchInvitationsFromSupabase, subscribeToRealtimeNotes, initAuthSession } = useAppStore();
 
   const handleOpenShareModal = (noteId?: string) => {
     setShareModalNoteId(noteId);
@@ -29,9 +29,10 @@ export const App: React.FC = () => {
   useEffect(() => {
     initAuthSession();
     fetchNotesFromSupabase();
+    fetchInvitationsFromSupabase();
     const unsubscribe = subscribeToRealtimeNotes();
     return () => unsubscribe();
-  }, [initAuthSession, fetchNotesFromSupabase, subscribeToRealtimeNotes]);
+  }, [initAuthSession, fetchNotesFromSupabase, fetchInvitationsFromSupabase, subscribeToRealtimeNotes]);
 
   return (
     <Router>
