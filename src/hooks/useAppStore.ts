@@ -214,17 +214,35 @@ export const useAppStore = create<AppState>()(
   fetchProfilesFromSupabase: async () => {
     if (!isSupabaseConfigured) return;
     try {
-      const { data, error } = await supabase.from('profiles').select('*');
-      if (error) throw error;
-      if (data && data.length > 0) {
-        const members: UserProfile[] = data.map((p: any) => ({
-          id: p.id,
-          fullName: p.full_name || p.email?.split('@')[0] || 'Thành viên',
-          email: p.email || '',
-          avatarUrl: p.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
-        }));
-        set({ teamMembers: members });
+      const activeUser = get().currentUser;
+      if (!activeUser) return;
+
+      const memberMap = new Map<string, UserProfile>();
+      memberMap.set(activeUser.id, activeUser);
+
+      // Only include profiles of members who accepted invitations
+      const acceptedInvitations = get().invitations.filter((i) => i.status === 'accepted');
+      const acceptedEmails = acceptedInvitations.map((i) => i.email.toLowerCase());
+
+      if (acceptedEmails.length > 0) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .in('email', acceptedEmails);
+
+        if (!error && data) {
+          data.forEach((p: any) => {
+            memberMap.set(p.id, {
+              id: p.id,
+              fullName: p.full_name || p.email?.split('@')[0] || 'Thành viên',
+              email: p.email || '',
+              avatarUrl: p.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
+            });
+          });
+        }
       }
+
+      set({ teamMembers: Array.from(memberMap.values()) });
     } catch (err) {
       console.warn('Supabase fetch profiles notice:', err);
     }
@@ -429,6 +447,7 @@ export const useAppStore = create<AppState>()(
         console.warn('Supabase accept invitation notice:', err);
       }
     }
+    get().fetchProfilesFromSupabase();
   },
 
   // 1h. Cancel / Revoke Invitation

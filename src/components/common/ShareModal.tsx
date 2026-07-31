@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, UserPlus, Shield, Check, Copy, Users } from 'lucide-react';
+import { X, UserPlus, Shield, Check, Copy, Users, Clock, Trash2 } from 'lucide-react';
 import { useAppStore } from '../../hooks/useAppStore';
 import { MemberPermission } from '../../types';
 
@@ -14,9 +14,12 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteTit
   const [permission, setPermission] = useState<MemberPermission>('edit');
   const [copied, setCopied] = useState(false);
   const [invitedSuccessEmail, setInvitedSuccessEmail] = useState<string | null>(null);
-  const { teamMembers, currentUser, sendInvitationInSupabase } = useAppStore();
+  const { teamMembers, currentUser, invitations, sendInvitationInSupabase, cancelInvitationInSupabase } = useAppStore();
 
   if (!isOpen) return null;
+
+  const pendingInvites = invitations.filter((i) => i.status === 'pending');
+  const displayMembers = teamMembers.length > 0 ? teamMembers : currentUser ? [currentUser] : [];
 
   const handleSendInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,8 +37,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteTit
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
-  const displayMembers = teamMembers.length > 0 ? teamMembers : currentUser ? [currentUser] : [];
 
   return (
     <div
@@ -106,32 +107,55 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteTit
             )}
           </form>
 
-          {/* Members List */}
+          {/* Official Members List */}
           <div>
-            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">
               Thành viên nhóm ({displayMembers.length})
             </h4>
-            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-              {displayMembers.length === 0 ? (
-                <p className="text-xs text-slate-400 py-2">Chưa có thành viên nào khác trong nhóm.</p>
-              ) : (
-                displayMembers.map((user, idx) => (
-                  <div key={user.id} className="flex items-center justify-between p-2.5 rounded-xl bg-background/50 border border-surface-border/50">
-                    <div className="flex items-center gap-3">
-                      <img src={user.avatarUrl} alt={user.fullName} className="h-8 w-8 rounded-full object-cover" />
-                      <div>
-                        <h5 className="text-xs font-semibold text-slate-200">{user.fullName}</h5>
-                        <p className="text-[10px] text-slate-400">{user.email}</p>
-                      </div>
+            <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
+              {displayMembers.map((user, idx) => (
+                <div key={user.id} className="flex items-center justify-between p-2.5 rounded-xl bg-background/50 border border-surface-border/50">
+                  <div className="flex items-center gap-3">
+                    <img src={user.avatarUrl} alt={user.fullName} className="h-8 w-8 rounded-full object-cover" />
+                    <div>
+                      <h5 className="text-xs font-semibold text-slate-200">{user.fullName}</h5>
+                      <p className="text-[10px] text-slate-400">{user.email}</p>
                     </div>
-                    <span className="text-xs text-slate-400 font-medium px-2 py-0.5 rounded bg-slate-800 border border-slate-700">
-                      {idx === 0 ? 'Chủ sở hữu' : 'Thành viên'}
-                    </span>
                   </div>
-                ))
-              )}
+                  <span className="text-[11px] text-indigo-300 font-semibold px-2.5 py-0.5 rounded-lg bg-indigo-500/15 border border-indigo-500/30">
+                    {idx === 0 || user.id === currentUser?.id ? 'Chủ sở hữu' : 'Thành viên'}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
+
+          {/* Pending Invitations List */}
+          {pendingInvites.length > 0 && (
+            <div className="pt-2 border-t border-surface-border/40">
+              <h4 className="text-xs font-bold text-amber-400/90 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5 text-amber-400" />
+                <span>Lời mời đang chờ ({pendingInvites.length})</span>
+              </h4>
+              <div className="space-y-2 max-h-32 overflow-y-auto pr-1">
+                {pendingInvites.map((inv) => (
+                  <div key={inv.id} className="flex items-center justify-between p-2.5 rounded-xl bg-amber-500/5 border border-amber-500/20">
+                    <div>
+                      <h5 className="text-xs font-semibold text-slate-200">{inv.email}</h5>
+                      <p className="text-[10px] text-amber-400/80 font-mono">Đang chờ chấp nhận lời mời</p>
+                    </div>
+                    <button
+                      onClick={() => cancelInvitationInSupabase(inv.id)}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                      title="Hủy lời mời này"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Copy Invite Link */}
           <div className="pt-2 border-t border-surface-border flex items-center justify-between">
