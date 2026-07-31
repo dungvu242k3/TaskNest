@@ -18,20 +18,15 @@ export const NotificationPopover: React.FC = () => {
     fetchInvitationsFromSupabase();
   }, [isOpen, fetchInvitationsFromSupabase]);
 
-  const userEmail = currentUser?.email?.toLowerCase() || '';
+  const userEmail = currentUser?.email?.toLowerCase().trim() || '';
 
-  // Filter pending invitations directed to current user OR all pending invites if owner
-  const myPendingInvites = invitations.filter(
+  // Only show invitations specifically sent to the logged-in user's email
+  const displayInvites = invitations.filter(
     (inv) =>
       inv.status === 'pending' &&
-      (userEmail === '' || inv.email.toLowerCase() === userEmail || !inv.email.includes('@'))
+      userEmail !== '' &&
+      inv.email.toLowerCase().trim() === userEmail
   );
-
-  // If no email match found, fallback to all pending invites so demo/test accounts see invitations too!
-  const displayInvites =
-    myPendingInvites.length > 0
-      ? myPendingInvites
-      : invitations.filter((i) => i.status === 'pending');
 
   const unreadCount = displayInvites.length;
 
