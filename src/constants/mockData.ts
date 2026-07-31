@@ -158,7 +158,7 @@ export const MOCK_ACTIVITIES: TeamActivity[] = [
   {
     id: 'act-3',
     user: CURRENT_USER,
-    action: 'đã tạo ghi chú dùng chung mới',
+    action: 'đã tạo ghi chú chung mới',
     noteTitle: 'Cập nhật Hệ thống Design Tokens & Giao diện UI',
     timestamp: '3 giờ trước',
   },

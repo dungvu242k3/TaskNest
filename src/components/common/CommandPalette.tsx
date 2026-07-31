@@ -136,7 +136,7 @@ export const CommandPalette: React.FC = () => {
                       </div>
                     </div>
                     <span className="text-[10px] font-mono text-slate-400 shrink-0 ml-2">
-                      {note.isPrivate ? 'Riêng tư' : 'Dùng chung'}
+                      {note.isPrivate ? 'Riêng tư' : 'Ghi chú chung'}
                     </span>
                   </button>
                 ))

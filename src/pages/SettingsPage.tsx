@@ -114,7 +114,7 @@ export const SettingsPage: React.FC = () => {
               <Bell className="h-5 w-5 text-amber-400" />
               <div>
                 <h4 className="text-sm font-semibold text-white">Thông báo Email</h4>
-                <p className="text-xs text-slate-400">Nhận thông báo khi thành viên mời hoặc chỉnh sửa ghi chú dùng chung</p>
+                <p className="text-xs text-slate-400">Nhận thông báo khi thành viên mời hoặc chỉnh sửa ghi chú chung</p>
               </div>
             </div>
             <input type="checkbox" defaultChecked className="h-5 w-5 rounded border-slate-700 text-indigo-600" />

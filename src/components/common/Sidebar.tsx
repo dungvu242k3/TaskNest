@@ -168,7 +168,7 @@ export const Sidebar: React.FC = () => {
                 >
                   <div className="flex items-center gap-2.5">
                     <Share2 className="h-3.5 w-3.5 text-indigo-400" />
-                    <span>Ghi chú dùng chung</span>
+                    <span>Ghi chú chung</span>
                   </div>
                   <span className="text-[10px] text-indigo-400/80 font-mono">{sharedCount}</span>
                 </NavLink>

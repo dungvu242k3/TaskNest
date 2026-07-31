@@ -108,7 +108,7 @@ export const NotesPage: React.FC = () => {
             }`}
           >
             <Share2 className="h-4 w-4 text-indigo-400" />
-            <span>Ghi chú dùng chung</span>
+            <span>Ghi chú chung</span>
             <span className="ml-1 px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px]">
               {notes.filter((n) => !n.isPrivate).length}
             </span>
@@ -191,7 +191,7 @@ export const NotesPage: React.FC = () => {
                     }`}
                   >
                     {note.isPrivate ? <Lock className="h-3 w-3" /> : <Share2 className="h-3 w-3" />}
-                    {note.isPrivate ? 'Riêng tư' : 'Dùng chung'}
+                    {note.isPrivate ? 'Riêng tư' : 'Ghi chú chung'}
                   </span>
 
                   <div className="flex items-center gap-2">

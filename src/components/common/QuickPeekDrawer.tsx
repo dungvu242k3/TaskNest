@@ -40,7 +40,7 @@ export const QuickPeekDrawer: React.FC = () => {
               </span>
             ) : (
               <span className="flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">
-                <Share2 className="h-3 w-3" /> Ghi chú Dùng chung
+                <Share2 className="h-3 w-3" /> Ghi chú chung
               </span>
             )}
             <PriorityBadge priority={note.priority} />

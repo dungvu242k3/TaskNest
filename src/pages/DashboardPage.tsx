@@ -30,7 +30,7 @@ export const DashboardPage: React.FC = () => {
           </h1>
           <p className="text-slate-300 text-xs mt-2 leading-relaxed">
             Bạn đang có <span className="text-indigo-400 font-semibold">{privateNotes.length} ghi chú riêng tư</span> và{' '}
-            <span className="text-amber-400 font-semibold">{sharedNotes.length} ghi chú dùng chung</span> đang hoạt động.
+            <span className="text-amber-400 font-semibold">{sharedNotes.length} ghi chú chung</span> đang hoạt động.
           </p>
         </div>
       </div>
@@ -61,7 +61,7 @@ export const DashboardPage: React.FC = () => {
 
         <div className="glass-panel glass-panel-hover p-5 rounded-2xl flex items-center justify-between">
           <div>
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Ghi chú Dùng chung</span>
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Ghi chú Chung</span>
             <div className="text-2xl font-bold text-amber-400 mt-1">{sharedNotes.length}</div>
             <p className="text-[11px] text-slate-400 mt-1">Đang hợp tác cùng nhóm</p>
           </div>
@@ -109,7 +109,7 @@ export const DashboardPage: React.FC = () => {
                       }`}
                     >
                       {note.isPrivate ? <Lock className="h-3 w-3" /> : <Share2 className="h-3 w-3" />}
-                      {note.isPrivate ? 'Riêng tư' : 'Dùng chung'}
+                      {note.isPrivate ? 'Riêng tư' : 'Ghi chú chung'}
                     </span>
                     <PriorityBadge priority={note.priority} />
                   </div>

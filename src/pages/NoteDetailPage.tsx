@@ -99,7 +99,7 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
             }`}
           >
             {isPrivate ? <Lock className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
-            <span>{isPrivate ? 'Ghi chú Riêng tư' : 'Ghi chú Dùng chung'}</span>
+            <span>{isPrivate ? 'Ghi chú Riêng tư' : 'Ghi chú chung'}</span>
           </button>
 
           {/* Share Button */}
