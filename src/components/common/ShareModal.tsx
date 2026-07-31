@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { X, UserPlus, Shield, Check, Copy } from 'lucide-react';
-import { MOCK_USERS } from '../../constants/mockData';
+import { X, UserPlus, Shield, Check, Copy, Users } from 'lucide-react';
+import { useAppStore } from '../../hooks/useAppStore';
 import { MemberPermission } from '../../types';
 
 interface ShareModalProps {
@@ -13,6 +13,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteTit
   const [email, setEmail] = useState('');
   const [permission, setPermission] = useState<MemberPermission>('edit');
   const [copied, setCopied] = useState(false);
+  const { teamMembers, currentUser } = useAppStore();
 
   if (!isOpen) return null;
 
@@ -28,6 +29,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteTit
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  const displayMembers = teamMembers.length > 0 ? teamMembers : currentUser ? [currentUser] : [];
 
   return (
     <div
@@ -95,23 +98,27 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteTit
           {/* Members List */}
           <div>
             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Thành viên nhóm ({MOCK_USERS.length})
+              Thành viên nhóm ({displayMembers.length})
             </h4>
             <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-              {MOCK_USERS.map((user, idx) => (
-                <div key={user.id} className="flex items-center justify-between p-2.5 rounded-xl bg-background/50 border border-surface-border/50">
-                  <div className="flex items-center gap-3">
-                    <img src={user.avatarUrl} alt={user.fullName} className="h-8 w-8 rounded-full object-cover" />
-                    <div>
-                      <h5 className="text-xs font-semibold text-slate-200">{user.fullName}</h5>
-                      <p className="text-[10px] text-slate-400">{user.email}</p>
+              {displayMembers.length === 0 ? (
+                <p className="text-xs text-slate-400 py-2">Chưa có thành viên nào khác trong nhóm.</p>
+              ) : (
+                displayMembers.map((user, idx) => (
+                  <div key={user.id} className="flex items-center justify-between p-2.5 rounded-xl bg-background/50 border border-surface-border/50">
+                    <div className="flex items-center gap-3">
+                      <img src={user.avatarUrl} alt={user.fullName} className="h-8 w-8 rounded-full object-cover" />
+                      <div>
+                        <h5 className="text-xs font-semibold text-slate-200">{user.fullName}</h5>
+                        <p className="text-[10px] text-slate-400">{user.email}</p>
+                      </div>
                     </div>
+                    <span className="text-xs text-slate-400 font-medium px-2 py-0.5 rounded bg-slate-800 border border-slate-700">
+                      {idx === 0 ? 'Chủ sở hữu' : 'Thành viên'}
+                    </span>
                   </div>
-                  <span className="text-xs text-slate-400 font-medium px-2 py-0.5 rounded bg-slate-800 border border-slate-700">
-                    {idx === 0 ? 'Chủ sở hữu' : idx % 2 === 0 ? 'Có quyền sửa' : 'Có quyền xem'}
-                  </span>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
 

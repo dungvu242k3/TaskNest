@@ -37,6 +37,7 @@ interface AppState {
 
   // Supabase Backend Sync Actions
   fetchNotesFromSupabase: () => Promise<void>;
+  fetchProfilesFromSupabase: () => Promise<void>;
   fetchDashboardMetricsFromSupabase: (userId?: string) => Promise<DashboardMetrics | null>;
   subscribeToRealtimeNotes: () => () => void;
 
@@ -57,8 +58,8 @@ interface AppState {
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
-  notes: MOCK_NOTES,
-  teamMembers: MOCK_USERS,
+  notes: [],
+  teamMembers: [],
   searchQuery: '',
   isCommandPaletteOpen: false,
   quickPeekNoteId: null,
@@ -108,6 +109,8 @@ export const useAppStore = create<AppState>()(
             avatarUrl: session.user.user_metadata?.avatar_url || CURRENT_USER.avatarUrl,
           },
         });
+        get().fetchNotesFromSupabase();
+        get().fetchProfilesFromSupabase();
       } else {
         set({ isLoggedIn: false, currentUser: null });
       }
@@ -123,6 +126,8 @@ export const useAppStore = create<AppState>()(
               avatarUrl: session.user.user_metadata?.avatar_url || CURRENT_USER.avatarUrl,
             },
           });
+          get().fetchNotesFromSupabase();
+          get().fetchProfilesFromSupabase();
         } else {
           set({ isLoggedIn: false, currentUser: null });
         }
@@ -145,7 +150,7 @@ export const useAppStore = create<AppState>()(
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
-      if (data && data.length > 0) {
+      if (data) {
         const mappedNotes: Note[] = data.map((item: any) => ({
           id: item.id,
           title: item.title,
@@ -166,12 +171,32 @@ export const useAppStore = create<AppState>()(
       }
     } catch (err: any) {
       if (err?.code === '42P17') {
-        console.info('Supabase RLS notice: infinite recursion detected in notes policy. Using local state.');
+        console.info('Supabase RLS notice: infinite recursion detected in notes policy.');
       } else {
-        console.warn('Supabase fetch notes fallback to local state:', err?.message || err);
+        console.warn('Supabase fetch notes notice:', err?.message || err);
       }
     } finally {
       set({ isLoadingSupabase: false });
+    }
+  },
+
+  // 1b. Fetch Profiles / Team Members from Supabase DB
+  fetchProfilesFromSupabase: async () => {
+    if (!isSupabaseConfigured) return;
+    try {
+      const { data, error } = await supabase.from('profiles').select('*');
+      if (error) throw error;
+      if (data && data.length > 0) {
+        const members: UserProfile[] = data.map((p: any) => ({
+          id: p.id,
+          fullName: p.full_name || p.email?.split('@')[0] || 'Thành viên',
+          email: p.email || '',
+          avatarUrl: p.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
+        }));
+        set({ teamMembers: members });
+      }
+    } catch (err) {
+      console.warn('Supabase fetch profiles notice:', err);
     }
   },
 

@@ -15,7 +15,6 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useAppStore } from '../hooks/useAppStore';
-import { MOCK_ACTIVITIES } from '../constants/mockData';
 
 interface TeamPageProps {
   onOpenShareModal?: () => void;
@@ -27,7 +26,7 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
   const [memberSearch, setMemberSearch] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
-  const { teamMembers, removeTeamMember } = useAppStore();
+  const { teamMembers, notes, currentUser, removeTeamMember } = useAppStore();
 
   const handleTabChange = (tab: string) => {
     setSearchParams({ tab });
@@ -90,7 +89,7 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
               Lời mời đang chờ
             </span>
             <div className="text-3xl font-extrabold text-amber-400 mt-1.5 font-mono">
-              1
+              0
             </div>
             <p className="text-[11px] text-slate-400 mt-1">Đang chờ phản hồi</p>
           </div>
@@ -105,7 +104,7 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
               Nhật ký Hoạt động
             </span>
             <div className="text-3xl font-extrabold text-emerald-400 mt-1.5 font-mono">
-              {MOCK_ACTIVITIES.length}
+              {notes.length}
             </div>
             <p className="text-[11px] text-slate-400 mt-1">Tương tác gần đây</p>
           </div>
@@ -144,7 +143,7 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
             <Mail className="h-4 w-4 text-amber-400" />
             <span>Lời mời đang chờ</span>
             <span className="ml-1 px-1.5 py-0.5 rounded-lg bg-slate-800 text-slate-300 text-[10px] font-mono">
-              1
+              0
             </span>
           </button>
 
@@ -159,7 +158,7 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
             <Activity className="h-4 w-4" />
             <span>Nhật ký hoạt động</span>
             <span className="ml-1 px-1.5 py-0.5 rounded-lg bg-slate-800 text-slate-300 text-[10px] font-mono">
-              {MOCK_ACTIVITIES.length}
+              {notes.length}
             </span>
           </button>
         </div>
@@ -196,13 +195,18 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
               <tbody className="divide-y divide-surface-border/40 text-slate-200">
                 {filteredMembers.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-8 text-center text-slate-400">
-                      Không tìm thấy thành viên nào phù hợp với từ khóa "{memberSearch}"
+                    <td colSpan={5} className="py-12 text-center text-slate-400 space-y-2">
+                      <Users className="h-8 w-8 text-slate-600 mx-auto" />
+                      <p className="text-xs">
+                        {memberSearch
+                          ? `Không tìm thấy thành viên nào phù hợp với từ khóa "${memberSearch}"`
+                          : 'Chưa có thành viên nào khác trong nhóm.'}
+                      </p>
                     </td>
                   </tr>
                 ) : (
                   filteredMembers.map((user, idx) => {
-                    const isOwner = user.id === 'usr-1' || idx === 0;
+                    const isOwner = idx === 0 || user.id === currentUser?.id;
 
                     return (
                       <tr key={user.id} className="hover:bg-surface-hover/40 transition-colors">
@@ -286,36 +290,13 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
               <span>Danh sách lời mời đang chờ xử lý</span>
             </h3>
             <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 font-mono">
-              1 Lời mời
+              0 Lời mời
             </span>
           </div>
 
-          <div className="p-5 rounded-2xl bg-background/60 border border-surface-border/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3.5">
-              <div className="p-3 rounded-2xl bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0">
-                <Mail className="h-5 w-5" />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-slate-100 font-mono">
-                  trinh.nguyen@company.com
-                </h4>
-                <p className="text-xs text-slate-400 mt-1">
-                  Được mời bởi <span className="text-slate-200 font-medium">Dũng Vũ</span> với quyền{' '}
-                  <span className="text-indigo-400 font-medium">Quyền chỉnh sửa</span> • Gửi 2 ngày trước
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-              <button className="flex items-center gap-1.5 py-2 px-3.5 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 text-xs font-semibold transition-all">
-                <RotateCw className="h-3.5 w-3.5" />
-                <span>Gửi lại</span>
-              </button>
-              <button className="flex items-center gap-1.5 py-2 px-3.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 text-xs font-semibold transition-all">
-                <XCircle className="h-3.5 w-3.5" />
-                <span>Thu hồi</span>
-              </button>
-            </div>
+          <div className="p-8 rounded-2xl bg-background/40 border border-surface-border/50 text-center space-y-2 text-slate-400">
+            <Mail className="h-8 w-8 text-slate-600 mx-auto" />
+            <p className="text-xs">Hiện tại không có lời mời nào đang chờ phản hồi.</p>
           </div>
         </div>
       )}
@@ -329,36 +310,43 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
               <span>Nhật ký hoạt động nhóm</span>
             </h3>
             <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-mono">
-              {MOCK_ACTIVITIES.length} Tương tác
+              {notes.length} Tương tác
             </span>
           </div>
 
-          <div className="space-y-3">
-            {MOCK_ACTIVITIES.map((act) => (
-              <div
-                key={act.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-background/50 border border-surface-border/50 hover:border-indigo-500/40 transition-colors gap-3"
-              >
-                <div className="flex items-center gap-3.5">
-                  <img
-                    src={act.user.avatarUrl}
-                    alt={act.user.fullName}
-                    className="h-8 w-8 rounded-full object-cover ring-1 ring-indigo-500/30 shrink-0"
-                  />
-                  <div className="text-xs text-slate-300">
-                    <span className="font-bold text-white">{act.user.fullName}</span>{' '}
-                    <span className="text-slate-400">{act.action}</span>{' '}
-                    <span className="font-semibold text-indigo-300">"{act.noteTitle}"</span>
+          {notes.length === 0 ? (
+            <div className="p-8 rounded-2xl bg-background/40 border border-surface-border/50 text-center space-y-2 text-slate-400">
+              <Activity className="h-8 w-8 text-slate-600 mx-auto" />
+              <p className="text-xs">Chưa có nhật ký hoạt động nào ghi nhận từ cơ sở dữ liệu.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {notes.map((note) => (
+                <div
+                  key={note.id}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-background/50 border border-surface-border/50 hover:border-indigo-500/40 transition-colors gap-3"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <img
+                      src={currentUser?.avatarUrl || note.owner.avatarUrl}
+                      alt={currentUser?.fullName || note.owner.fullName}
+                      className="h-8 w-8 rounded-full object-cover ring-1 ring-indigo-500/30 shrink-0"
+                    />
+                    <div className="text-xs text-slate-300">
+                      <span className="font-bold text-white">{currentUser?.fullName || 'Thành viên'}</span>{' '}
+                      <span className="text-slate-400">vừa tạo/cập nhật ghi chú</span>{' '}
+                      <span className="font-semibold text-indigo-300">"{note.title || 'Untitled'}"</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono self-end sm:self-auto">
+                    <Clock className="h-3 w-3 text-slate-500" />
+                    <span>{new Date(note.updatedAt).toLocaleDateString('vi-VN')}</span>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono self-end sm:self-auto">
-                  <Clock className="h-3 w-3 text-slate-500" />
-                  <span>{act.timestamp}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

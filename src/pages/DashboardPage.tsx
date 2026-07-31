@@ -16,7 +16,6 @@ import {
 import { useAppStore } from '../hooks/useAppStore';
 import { PriorityBadge } from '../components/ui/PriorityBadge';
 import { AvatarStack } from '../components/ui/AvatarStack';
-import { MOCK_ACTIVITIES } from '../constants/mockData';
 
 interface DashboardPageProps {
   onOpenCreateNoteModal?: () => void;
@@ -249,29 +248,36 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </h3>
 
           <div className="glass-panel p-6 rounded-3xl border border-surface-border/60 bg-surface/30 space-y-4">
-            {MOCK_ACTIVITIES.map((act) => (
-              <div
-                key={act.id}
-                className="flex items-start gap-3.5 pb-4 border-b border-surface-border/40 last:pb-0 last:border-0"
-              >
-                <img
-                  src={act.user.avatarUrl}
-                  alt={act.user.fullName}
-                  className="h-9 w-9 rounded-full object-cover shrink-0 ring-1 ring-indigo-500/30 mt-0.5"
-                />
-                <div className="text-xs leading-relaxed flex-1 min-w-0">
-                  <p className="text-slate-200">
-                    <span className="font-semibold text-white">{act.user.fullName}</span>{' '}
-                    <span className="text-slate-400">{act.action}</span>{' '}
-                    <span className="font-semibold text-indigo-300">"{act.noteTitle}"</span>
-                  </p>
-                  <div className="text-[10px] text-slate-400 font-mono mt-1 flex items-center gap-1">
-                    <Clock className="h-3 w-3 text-slate-500" />
-                    <span>{act.timestamp}</span>
+            {notes.length === 0 ? (
+              <div className="text-center py-6 text-slate-400 space-y-2">
+                <Activity className="h-8 w-8 text-slate-600 mx-auto" />
+                <p className="text-xs">Chưa có hoạt động nào trong không gian làm việc.</p>
+              </div>
+            ) : (
+              notes.slice(0, 5).map((note) => (
+                <div
+                  key={note.id}
+                  className="flex items-start gap-3.5 pb-4 border-b border-surface-border/40 last:pb-0 last:border-0"
+                >
+                  <img
+                    src={currentUser?.avatarUrl || note.owner.avatarUrl}
+                    alt={currentUser?.fullName || note.owner.fullName}
+                    className="h-9 w-9 rounded-full object-cover shrink-0 ring-1 ring-indigo-500/30 mt-0.5"
+                  />
+                  <div className="text-xs leading-relaxed flex-1 min-w-0">
+                    <p className="text-slate-200">
+                      <span className="font-semibold text-white">{currentUser?.fullName || 'Người dùng'}</span>{' '}
+                      <span className="text-slate-400">vừa cập nhật ghi chú</span>{' '}
+                      <span className="font-semibold text-indigo-300">"{note.title || 'Untitled'}"</span>
+                    </p>
+                    <div className="text-[10px] text-slate-400 font-mono mt-1 flex items-center gap-1">
+                      <Clock className="h-3 w-3 text-slate-500" />
+                      <span>{new Date(note.updatedAt).toLocaleDateString('vi-VN')}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
