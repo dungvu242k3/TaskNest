@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Command, Bell } from 'lucide-react';
+import { Search, Command, Bell, LogIn } from 'lucide-react';
 import { useAppStore } from '../../hooks/useAppStore';
 import { CURRENT_USER } from '../../constants/mockData';
 
@@ -32,7 +32,7 @@ export const Header: React.FC = () => {
         </button>
       </div>
 
-      {/* Right Header Actions: Notification Bell + User Profile Avatar */}
+      {/* Right Header Actions: Notification Bell + Login Link + User Profile Avatar */}
       <div className="flex items-center justify-end gap-3 w-48">
         {/* Notifications */}
         <button
@@ -42,6 +42,16 @@ export const Header: React.FC = () => {
         >
           <Bell className="h-5 w-5" />
           <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
+        </button>
+
+        {/* Demo Login Page Link */}
+        <button
+          onClick={() => navigate('/login')}
+          title="Trang Đăng nhập / Đăng ký"
+          className="p-2 rounded-xl text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors focus:outline-none flex items-center gap-1.5 text-xs font-semibold"
+        >
+          <LogIn className="h-4 w-4" />
+          <span className="hidden sm:inline">Đăng nhập</span>
         </button>
 
         {/* User Profile Avatar Link */}
