@@ -349,10 +349,15 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
 
             {/* Collaborators if shared */}
             {!isPrivate && (
-              <div className="space-y-1.5 pt-1 border-t border-surface-border/40">
-                <label className="text-xs text-slate-400 font-medium">Thành viên cùng tham gia</label>
+              <div className="space-y-2 pt-1 border-t border-surface-border/40">
+                <label className="text-xs text-slate-400 font-medium flex items-center justify-between">
+                  <span>Thành viên cùng tham gia</span>
+                  <span className="text-[10px] font-mono text-indigo-400 font-semibold">
+                    {note.members.length} người
+                  </span>
+                </label>
                 <div className="pt-1">
-                  <AvatarStack members={note.members} />
+                  <AvatarStack members={note.members} showNames={true} />
                 </div>
               </div>
             )}
