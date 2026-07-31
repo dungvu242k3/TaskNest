@@ -103,7 +103,7 @@ export const DashboardPage: React.FC = () => {
             {notes.slice(0, 4).map((note) => (
               <div
                 key={note.id}
-                onClick={() => navigate(`/notes?id=${note.id}`)}
+                onClick={() => navigate(`/notes/${note.id}`)}
                 className="glass-panel glass-panel-hover p-5 rounded-2xl cursor-pointer flex flex-col justify-between group"
               >
                 <div>

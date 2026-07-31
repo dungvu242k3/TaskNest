@@ -40,7 +40,15 @@ export const App: React.FC = () => {
                   />
                 }
               />
-              <Route path="/notes/:id" element={<NoteDetailPage onOpenShareModal={() => setShareModalOpen(true)} />} />
+              <Route
+                path="/notes/:id"
+                element={
+                  <NotesPage
+                    onOpenCreateNoteModal={() => setCreateNoteModalOpen(true)}
+                    onOpenShareModal={() => setShareModalOpen(true)}
+                  />
+                }
+              />
               <Route path="/team" element={<TeamPage onOpenShareModal={() => setShareModalOpen(true)} />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Routes>

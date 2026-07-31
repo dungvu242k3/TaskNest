@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
 import {
   FileText,
   Lock,
@@ -29,6 +29,8 @@ export const NotesPage: React.FC<NotesPageProps> = ({
   onOpenShareModal,
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { id: routeId } = useParams<{ id?: string }>();
+  const navigate = useNavigate();
   const {
     notes,
     togglePinNote,
@@ -39,7 +41,7 @@ export const NotesPage: React.FC<NotesPageProps> = ({
   } = useAppStore();
 
   const currentTab = searchParams.get('tab') || 'all';
-  const noteIdParam = searchParams.get('id');
+  const noteIdParam = routeId || searchParams.get('id');
 
   const [filterPriority, setFilterPriority] = useState<string>('all');
   const [searchFilter, setSearchFilter] = useState<string>('');
@@ -91,11 +93,9 @@ export const NotesPage: React.FC<NotesPageProps> = ({
 
   const handleSelectNote = (id: string) => {
     setSelectedNoteId(id);
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.set('id', id);
-      return next;
-    });
+    const tab = searchParams.get('tab');
+    const tabQuery = tab ? `?tab=${tab}` : '';
+    navigate(`/notes/${id}${tabQuery}`);
   };
 
   const selectedNote = notes.find((n) => n.id === selectedNoteId);
