@@ -44,7 +44,7 @@ export const MOCK_NOTES: Note[] = [
     status: 'in_progress',
     priority: 'P1',
     dueDate: '2026-08-05',
-    tags: ['Sản phẩm', 'Chiến lược', 'Q3'],
+    tags: [],
     owner: CURRENT_USER,
     members: [
       { user: CURRENT_USER, permission: 'owner', status: 'accepted' },
