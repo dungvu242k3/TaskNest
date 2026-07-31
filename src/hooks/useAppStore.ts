@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { Note, NoteStatus, PriorityLevel, MemberPermission, UserProfile } from '../types';
 import { MOCK_NOTES, MOCK_USERS, CURRENT_USER } from '../constants/mockData';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
@@ -51,7 +52,9 @@ interface AppState {
   deleteNote: (id: string) => Promise<void>;
 }
 
-export const useAppStore = create<AppState>((set, get) => ({
+export const useAppStore = create<AppState>()(
+  persist(
+    (set, get) => ({
   notes: MOCK_NOTES,
   teamMembers: MOCK_USERS,
   searchQuery: '',
@@ -475,4 +478,16 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
     }
   },
-}));
+}),
+{
+  name: 'tasknest-storage',
+  storage: createJSONStorage(() => localStorage),
+  partialize: (state) => ({
+    notes: state.notes,
+    teamMembers: state.teamMembers,
+    isLoggedIn: state.isLoggedIn,
+    currentUser: state.currentUser,
+  }),
+}
+)
+);
