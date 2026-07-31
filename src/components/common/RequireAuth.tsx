@@ -35,29 +35,18 @@ export const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
               Đăng Nhập để Sử Dụng Tính Năng
             </h2>
             <p className="text-xs text-slate-300 leading-relaxed max-w-md mx-auto">
-              Bạn chưa đăng nhập vào hệ thống TaskNest. Vui lòng đăng nhập hoặc chọn trải nghiệm nhanh để truy cập bảng điều khiển, tạo ghi chú và quản lý nhóm.
+              Bạn chưa đăng nhập vào hệ thống TaskNest. Vui lòng đăng nhập tài khoản của bạn để truy cập bảng điều khiển, tạo ghi chú và quản lý nhóm.
             </p>
           </div>
 
-          {/* Action Buttons */}
-          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+          {/* Action Button */}
+          <div className="pt-2 flex justify-center">
             <button
               onClick={() => navigate('/login')}
-              className="w-full sm:w-auto py-3 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-glow hover:scale-[1.02] active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 border border-indigo-400/30"
+              className="w-full sm:w-auto py-3 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-glow hover:scale-[1.02] active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 border border-indigo-400/30"
             >
               <LogIn className="h-4 w-4" />
               <span>Chuyển tới Trang Đăng Nhập</span>
-            </button>
-
-            <button
-              onClick={() => {
-                login();
-                navigate('/');
-              }}
-              className="w-full sm:w-auto py-3 px-5 rounded-2xl bg-surface-hover/80 hover:bg-surface-hover text-slate-200 hover:text-white text-xs font-semibold border border-surface-border transition-all flex items-center justify-center gap-2"
-            >
-              <Zap className="h-4 w-4 text-amber-400" />
-              <span>Đăng Nhập Nhanh (Demo)</span>
             </button>
           </div>
         </div>

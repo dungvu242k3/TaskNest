@@ -101,9 +101,7 @@ export const LoginPage: React.FC = () => {
       } else if (msg.includes('User already registered')) {
         setErrorMessage('Địa chỉ email này đã được đăng ký.');
       } else {
-        // Safe fallback for demo mode
-        login();
-        navigate('/');
+        setErrorMessage(`Đăng nhập thất bại: ${msg}`);
       }
     } finally {
       setLoading(false);
@@ -139,16 +137,11 @@ export const LoginPage: React.FC = () => {
         err?.error_code === 'validation_failed'
       ) {
         setErrorMessage(
-          'Dự án Supabase chưa bật Google OAuth Provider trong Auth Settings. Đang đăng nhập tài khoản Demo...'
+          'Dự án Supabase chưa bật Google OAuth Provider trong Auth Settings. Vui lòng bật Google Provider trong Supabase Dashboard.'
         );
       } else {
-        setErrorMessage('Đã xảy ra lỗi khi kết nối Google OAuth. Đang đăng nhập tài khoản Demo...');
+        setErrorMessage(`Đã xảy ra lỗi khi kết nối Google OAuth: ${errorStr}`);
       }
-
-      setTimeout(() => {
-        login();
-        navigate('/');
-      }, 1200);
     } finally {
       setLoading(false);
     }
