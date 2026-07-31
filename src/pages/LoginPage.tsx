@@ -123,8 +123,14 @@ export const LoginPage: React.FC = () => {
       if (error) throw error;
     } catch (err: any) {
       console.warn('Google Auth Notice:', err.message || err);
-      login();
-      navigate('/');
+      const msg = err.message || JSON.stringify(err);
+      if (msg.includes('provider is not enabled') || msg.includes('Unsupported provider')) {
+        setErrorMessage('Dự án Supabase chưa bật Google OAuth Provider trong Auth Settings. Đang đăng nhập tài khoản Demo...');
+      }
+      setTimeout(() => {
+        login();
+        navigate('/');
+      }, 1200);
     } finally {
       setLoading(false);
     }
