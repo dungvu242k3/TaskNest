@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { X, Plus, Lock, Share2, Sparkles, Calendar } from 'lucide-react';
 import { useAppStore } from '../../hooks/useAppStore';
 import { PrioritySelect } from '../ui/PrioritySelect';
+import { DatePicker } from '../ui/DatePicker';
 import { PriorityLevel } from '../../types';
 
 interface CreateNoteModalProps {
@@ -170,11 +171,10 @@ export const CreateNoteModal: React.FC<CreateNoteModalProps> = ({ isOpen, onClos
                 </span>
                 <span className="text-[10px] text-slate-500 font-normal">Tùy chọn</span>
               </label>
-              <input
-                type="date"
+              <DatePicker
                 value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl bg-background border border-surface-border text-slate-200 text-xs font-medium focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
+                onChange={(d) => setDueDate(d)}
+                placeholder="Chọn hạn chót..."
               />
             </div>
           </div>

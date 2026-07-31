@@ -19,6 +19,7 @@ import {
 import { useAppStore } from '../hooks/useAppStore';
 import { PriorityBadge } from '../components/ui/PriorityBadge';
 import { PrioritySelect } from '../components/ui/PrioritySelect';
+import { DatePicker } from '../components/ui/DatePicker';
 import { AvatarStack } from '../components/ui/AvatarStack';
 import { PriorityLevel } from '../types';
 
@@ -347,31 +348,18 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
               />
             </div>
 
-            {/* Due Date Picker */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs text-slate-400 font-medium flex items-center gap-1.5">
-                  <Calendar className="h-3.5 w-3.5 text-indigo-400" />
-                  <span>Hạn chót</span>
-                </label>
-                {dueDate && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDueDate('');
-                      updateNote(note.id, { dueDate: undefined });
-                    }}
-                    className="text-[10px] text-slate-400 hover:text-rose-400 transition-colors"
-                  >
-                    Xóa hạn
-                  </button>
-                )}
-              </div>
-              <input
-                type="date"
+            {/* Due date picker */}
+            <div className="space-y-1.5 pt-1 border-t border-surface-border/40">
+              <label className="text-xs text-slate-400 font-medium flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5 text-indigo-400" />
+                <span>Hạn chót công việc</span>
+              </label>
+              <DatePicker
                 value={dueDate}
-                onChange={handleDueDateChange}
-                className="w-full bg-background/60 text-xs text-slate-200 px-3.5 py-2.5 rounded-xl border border-surface-border/60 focus:outline-none focus:border-indigo-500/80 transition-colors font-mono cursor-pointer"
+                onChange={(dateStr) => {
+                  setDueDate(dateStr);
+                  updateNote(note.id, { dueDate: dateStr || undefined });
+                }}
               />
             </div>
 
