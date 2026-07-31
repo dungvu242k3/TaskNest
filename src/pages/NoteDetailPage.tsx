@@ -48,6 +48,7 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
   const [content, setContent] = useState(note?.content || '');
   const [isPrivate, setIsPrivate] = useState(note?.isPrivate ?? true);
   const [priority, setPriority] = useState<PriorityLevel>(note?.priority || 'P2');
+  const [dueDate, setDueDate] = useState<string>(note?.dueDate || '');
   const [newChecklistText, setNewChecklistText] = useState('');
   const [savedStatus, setSavedStatus] = useState('Đã tự động lưu');
 
@@ -97,6 +98,14 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
   const handlePriorityChange = (newPriority: PriorityLevel) => {
     setPriority(newPriority);
     updateNote(note.id, { priority: newPriority });
+  };
+
+  const handleDueDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setDueDate(val);
+    updateNote(note.id, { dueDate: val || undefined });
+    setSavedStatus('Đang lưu thay đổi...');
+    setTimeout(() => setSavedStatus('Đã tự động lưu'), 600);
   };
 
   const handleAddChecklist = (e: React.FormEvent) => {
@@ -338,13 +347,32 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
               />
             </div>
 
-            {/* Due Date */}
+            {/* Due Date Picker */}
             <div className="space-y-1.5">
-              <label className="text-xs text-slate-400 font-medium">Hạn chót</label>
-              <div className="flex items-center gap-2 text-xs text-slate-300 bg-background/50 px-3.5 py-2.5 rounded-xl border border-surface-border/40 font-mono">
-                <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                <span>{note.dueDate || 'Chưa thiết lập'}</span>
+              <div className="flex items-center justify-between">
+                <label className="text-xs text-slate-400 font-medium flex items-center gap-1.5">
+                  <Calendar className="h-3.5 w-3.5 text-indigo-400" />
+                  <span>Hạn chót</span>
+                </label>
+                {dueDate && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDueDate('');
+                      updateNote(note.id, { dueDate: undefined });
+                    }}
+                    className="text-[10px] text-slate-400 hover:text-rose-400 transition-colors"
+                  >
+                    Xóa hạn
+                  </button>
+                )}
               </div>
+              <input
+                type="date"
+                value={dueDate}
+                onChange={handleDueDateChange}
+                className="w-full bg-background/60 text-xs text-slate-200 px-3.5 py-2.5 rounded-xl border border-surface-border/60 focus:outline-none focus:border-indigo-500/80 transition-colors font-mono cursor-pointer"
+              />
             </div>
 
             {/* Collaborators if shared */}

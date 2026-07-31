@@ -54,7 +54,7 @@ interface AppState {
   // Note & Member Actions
   togglePinNote: (id: string) => Promise<void>;
   updateNoteStatus: (id: string, status: NoteStatus) => Promise<void>;
-  updateNote: (id: string, updates: Partial<Pick<Note, 'title' | 'content' | 'isPrivate' | 'priority'>>) => Promise<void>;
+  updateNote: (id: string, updates: Partial<Pick<Note, 'title' | 'content' | 'isPrivate' | 'priority' | 'dueDate'>>) => Promise<void>;
   toggleChecklistItem: (noteId: string, checklistId: string) => Promise<void>;
   addChecklistItem: (noteId: string, text: string) => Promise<void>;
   deleteChecklistItem: (noteId: string, checklistId: string) => Promise<void>;
@@ -566,6 +566,7 @@ export const useAppStore = create<AppState>()(
         if (updates.content !== undefined) payload.content = updates.content;
         if (updates.isPrivate !== undefined) payload.is_private = updates.isPrivate;
         if (updates.priority !== undefined) payload.priority = updates.priority;
+        if (updates.dueDate !== undefined) payload.due_date = updates.dueDate || null;
 
         await supabase.from('notes').update(payload).eq('id', id);
       } catch (err) {
