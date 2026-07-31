@@ -116,9 +116,11 @@ export const LoginPage: React.FC = () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        },
       });
       if (error) throw error;
-      login();
     } catch (err: any) {
       console.warn('Google Auth Notice:', err.message || err);
       login();
