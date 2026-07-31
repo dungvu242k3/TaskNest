@@ -79,6 +79,7 @@ export interface TeamInvitation {
   invitedBy: UserProfile;
   permission: MemberPermission;
   status: 'pending' | 'accepted' | 'canceled';
+  providerType?: 'google' | 'email' | 'unregistered';
   createdAt: string;
 }
 

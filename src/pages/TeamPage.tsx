@@ -428,11 +428,20 @@ export const TeamPage: React.FC<TeamPageProps> = ({ onOpenShareModal }) => {
                           <Mail className="h-5 w-5" />
                         </div>
                         <div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-bold text-white text-sm">{invite.email}</span>
                             <span className="px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-semibold">
                               Quyền {invite.permission === 'edit' ? 'Chỉnh sửa' : 'Xem'}
                             </span>
+                            {invite.providerType === 'google' || invite.email.toLowerCase().endsWith('@gmail.com') ? (
+                              <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[10px] font-semibold">
+                                Tài khoản Google (OAuth)
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-semibold">
+                                Đăng ký Email / Mật khẩu
+                              </span>
+                            )}
                           </div>
                           <p className="text-[11px] text-slate-400 mt-0.5">
                             Đã gửi lúc {new Date(invite.createdAt).toLocaleString('vi-VN')} bởi {invite.invitedBy.fullName || 'Chủ nhóm'}

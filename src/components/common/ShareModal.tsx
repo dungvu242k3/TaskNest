@@ -150,7 +150,18 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, noteId,
                 {pendingInvites.map((inv) => (
                   <div key={inv.id} className="flex items-center justify-between p-2.5 rounded-xl bg-amber-500/5 border border-amber-500/20">
                     <div>
-                      <h5 className="text-xs font-semibold text-slate-200">{inv.email}</h5>
+                      <div className="flex items-center gap-1.5">
+                        <h5 className="text-xs font-semibold text-slate-200">{inv.email}</h5>
+                        {inv.providerType === 'google' || inv.email.toLowerCase().endsWith('@gmail.com') ? (
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">
+                            Google OAuth
+                          </span>
+                        ) : (
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                            Email/Mật khẩu
+                          </span>
+                        )}
+                      </div>
                       <p className="text-[10px] text-amber-400/80 font-mono">Đang chờ chấp nhận lời mời</p>
                     </div>
                     <button

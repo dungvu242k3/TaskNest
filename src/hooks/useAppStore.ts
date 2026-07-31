@@ -374,6 +374,7 @@ export const useAppStore = create<AppState>()(
           invitedBy: get().currentUser || CURRENT_USER,
           permission: item.permission || 'edit',
           status: item.status || 'pending',
+          providerType: item.provider_type || (item.email?.toLowerCase().endsWith('@gmail.com') ? 'google' : 'email'),
           createdAt: item.created_at || new Date().toISOString(),
         }));
 
@@ -400,6 +401,8 @@ export const useAppStore = create<AppState>()(
       get().updateNote(noteId, { isPrivate: false });
     }
 
+    const inferredProviderType: 'google' | 'email' = sanitizedEmail.endsWith('@gmail.com') ? 'google' : 'email';
+
     const newInvite: TeamInvitation = {
       id: `inv-${Date.now()}`,
       teamId: teamId || get().activeTeamId || undefined,
@@ -409,6 +412,7 @@ export const useAppStore = create<AppState>()(
       invitedBy: get().currentUser || CURRENT_USER,
       permission,
       status: 'pending',
+      providerType: inferredProviderType,
       createdAt: new Date().toISOString(),
     };
 
@@ -425,43 +429,67 @@ export const useAppStore = create<AppState>()(
           !!str && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(str);
 
         if (currentUserId && isValidUUID(currentUserId)) {
-          const rawTeamId = teamId || get().activeTeamId;
-          const payload: any = {
-            email: sanitizedEmail,
-            permission,
-            team_id: isValidUUID(rawTeamId) ? rawTeamId : null,
-            invited_by: currentUserId,
-            status: 'pending',
-          };
-          if (noteId && isValidUUID(noteId)) {
-            payload.note_id = noteId;
-          }
+          const { data: rpcData, error: rpcError } = await supabase.rpc('invite_and_check_auth_provider', {
+            p_email: sanitizedEmail,
+            p_permission: permission,
+            p_note_id: isValidUUID(noteId) ? noteId : null,
+            p_team_id: isValidUUID(teamId) ? teamId : null,
+          });
 
-          let { data, error } = await supabase
-            .from('team_invitations')
-            .insert(payload)
-            .select()
-            .single();
+          if (!rpcError && rpcData) {
+            set((state) => ({
+              invitations: state.invitations.map((i) =>
+                i.id === newInvite.id
+                  ? {
+                      ...i,
+                      id: rpcData.id || i.id,
+                      providerType: rpcData.provider_type || inferredProviderType,
+                    }
+                  : i
+              ),
+            }));
+          } else {
+            const rawTeamId = teamId || get().activeTeamId;
+            const payload: any = {
+              email: sanitizedEmail,
+              permission,
+              team_id: isValidUUID(rawTeamId) ? rawTeamId : null,
+              invited_by: currentUserId,
+              status: 'pending',
+              provider_type: inferredProviderType,
+            };
+            if (noteId && isValidUUID(noteId)) {
+              payload.note_id = noteId;
+            }
 
-          if (error && (error.message?.includes('note_id') || error.code === '42703')) {
-            delete payload.note_id;
-            const retry = await supabase
+            let { data, error } = await supabase
               .from('team_invitations')
               .insert(payload)
               .select()
               .single();
-            data = retry.data;
-            error = retry.error;
-          }
 
-          if (error) {
-            console.error('Supabase send invitation error:', error);
-          } else if (data) {
-            set((state) => ({
-              invitations: state.invitations.map((i) =>
-                i.id === newInvite.id ? { ...i, id: data.id } : i
-              ),
-            }));
+            if (error && (error.message?.includes('note_id') || error.code === '42703')) {
+              delete payload.note_id;
+              const retry = await supabase
+                .from('team_invitations')
+                .insert(payload)
+                .select()
+                .single();
+              data = retry.data;
+              error = retry.error;
+            }
+
+            if (error) {
+              console.error('Supabase send invitation error:', error);
+            } else if (data) {
+              set((state) => ({
+                invitations: state.invitations.map((i) =>
+                  i.id === newInvite.id
+                    ? { ...i, id: data.id, providerType: data.provider_type || inferredProviderType }
+                    : i
+                ),
+              }));
+            }
           }
         }
       } catch (err) {
