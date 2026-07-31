@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   FileText,
@@ -27,7 +27,13 @@ export const NotesPage: React.FC<NotesPageProps> = ({
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { notes, togglePinNote } = useAppStore();
+  const { notes, togglePinNote, fetchNotesFromSupabase, subscribeToRealtimeNotes } = useAppStore();
+
+  useEffect(() => {
+    fetchNotesFromSupabase();
+    const unsubscribe = subscribeToRealtimeNotes();
+    return () => unsubscribe();
+  }, [fetchNotesFromSupabase, subscribeToRealtimeNotes]);
 
   const currentTab = searchParams.get('tab') || 'all';
   const [filterPriority, setFilterPriority] = useState<string>('all');

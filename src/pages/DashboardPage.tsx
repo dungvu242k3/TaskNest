@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   FileText,
@@ -26,7 +26,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onOpenCreateNoteModal,
 }) => {
   const navigate = useNavigate();
-  const { notes } = useAppStore();
+  const { notes, fetchNotesFromSupabase, fetchDashboardMetricsFromSupabase, subscribeToRealtimeNotes } = useAppStore();
+
+  useEffect(() => {
+    fetchNotesFromSupabase();
+    fetchDashboardMetricsFromSupabase();
+    const unsubscribe = subscribeToRealtimeNotes();
+    return () => unsubscribe();
+  }, [fetchNotesFromSupabase, fetchDashboardMetricsFromSupabase, subscribeToRealtimeNotes]);
 
   const privateNotes = notes.filter((n) => n.isPrivate);
   const sharedNotes = notes.filter((n) => !n.isPrivate);
