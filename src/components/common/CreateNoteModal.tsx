@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Plus, Lock, Share2, Sparkles } from 'lucide-react';
+import { X, Plus, Lock, Share2, Sparkles, Calendar } from 'lucide-react';
 import { useAppStore } from '../../hooks/useAppStore';
 import { PriorityLevel } from '../../types';
 
@@ -16,14 +16,16 @@ export const CreateNoteModal: React.FC<CreateNoteModalProps> = ({ isOpen, onClos
   const [title, setTitle] = useState('');
   const [isPrivate, setIsPrivate] = useState(true);
   const [priority, setPriority] = useState<PriorityLevel>('P2');
+  const [dueDate, setDueDate] = useState<string>('');
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const noteTitle = title.trim() || 'Ghi chú chưa đặt tên';
-    const newNote = await addNote(noteTitle, isPrivate, priority);
+    const newNote = await addNote(noteTitle, isPrivate, priority, dueDate);
     setTitle('');
+    setDueDate('');
     onClose();
     if (newNote?.id) {
       navigate(`/notes/${newNote.id}`);
@@ -145,20 +147,40 @@ export const CreateNoteModal: React.FC<CreateNoteModalProps> = ({ isOpen, onClos
             </div>
           </div>
 
-          {/* Priority Level Selector */}
-          <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-              Độ Ưu Tiên
-            </label>
-            <select
-              value={priority}
-              onChange={(e) => setPriority(e.target.value as PriorityLevel)}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-background border border-surface-border text-slate-200 text-xs font-medium focus:outline-none focus:border-indigo-500"
-            >
-              <option value="P1">P1 • Cao (High Priority)</option>
-              <option value="P2">P2 • Trung bình (Medium Priority)</option>
-              <option value="P3">P3 • Thấp (Low Priority)</option>
-            </select>
+          {/* Priority Level & Due Date Selectors */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            {/* Priority Selector */}
+            <div>
+              <label className="text-xs font-semibold text-slate-300 block mb-1.5">
+                Mức độ Ưu tiên
+              </label>
+              <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value as PriorityLevel)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-background border border-surface-border text-slate-200 text-xs font-medium focus:outline-none focus:border-indigo-500 transition-colors"
+              >
+                <option value="P1">P1 • Cao (High)</option>
+                <option value="P2">P2 • Trung bình (Medium)</option>
+                <option value="P3">P3 • Thấp (Low)</option>
+              </select>
+            </div>
+
+            {/* Due Date Picker */}
+            <div>
+              <label className="text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-3.5 w-3.5 text-indigo-400" />
+                  <span>Hạn chót</span>
+                </span>
+                <span className="text-[10px] text-slate-500 font-normal">Tùy chọn</span>
+              </label>
+              <input
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="w-full px-3.5 py-2 rounded-xl bg-background border border-surface-border text-slate-200 text-xs font-medium focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
+              />
+            </div>
           </div>
 
           {/* Actions Buttons */}

@@ -12,6 +12,7 @@ import {
   CheckSquare,
   Clock,
   Sparkles,
+  Calendar,
 } from 'lucide-react';
 import { useAppStore } from '../hooks/useAppStore';
 import { PriorityBadge } from '../components/ui/PriorityBadge';
@@ -282,10 +283,18 @@ export const NotesPage: React.FC<NotesPageProps> = ({
 
                 {/* Card Footer */}
                 <div className="mt-5 pt-3.5 border-t border-surface-border/40 flex items-center justify-between text-xs text-slate-400">
-                  <span className="text-[11px] text-slate-400 font-mono flex items-center gap-1.5">
-                    <Clock className="h-3.5 w-3.5 text-slate-500" />
-                    <span>{new Date(note.updatedAt).toLocaleDateString('vi-VN')}</span>
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[11px] text-slate-400 font-mono flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5 text-slate-500" />
+                      <span>{new Date(note.updatedAt).toLocaleDateString('vi-VN')}</span>
+                    </span>
+                    {note.dueDate && (
+                      <span className="text-[11px] text-amber-400/90 font-mono flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
+                        <Calendar className="h-3 w-3" />
+                        <span>Hạn: {note.dueDate}</span>
+                      </span>
+                    )}
+                  </div>
                   {!note.isPrivate && <AvatarStack members={note.members} />}
                 </div>
               </div>

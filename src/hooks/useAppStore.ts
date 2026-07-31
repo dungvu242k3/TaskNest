@@ -61,7 +61,7 @@ interface AppState {
   updateChecklistItem: (noteId: string, checklistId: string, text: string) => Promise<void>;
   updateMemberPermission: (noteId: string, userId: string, permission: MemberPermission) => Promise<void>;
   removeTeamMember: (userId: string) => Promise<void>;
-  addNote: (title: string, isPrivate: boolean, priority?: PriorityLevel) => Promise<Note>;
+  addNote: (title: string, isPrivate: boolean, priority?: PriorityLevel, dueDate?: string) => Promise<Note>;
   deleteNote: (id: string) => Promise<void>;
 }
 
@@ -704,7 +704,7 @@ export const useAppStore = create<AppState>()(
   },
 
   // 11. Create Note with Supabase Sync & Rate Limit Protection
-  addNote: async (title, isPrivate, priority = 'P2') => {
+  addNote: async (title, isPrivate, priority = 'P2', dueDate?: string) => {
     // Client-side Rate Limit Throttling Guard (Max 5 note creations per minute)
     const now = Date.now();
     const recentCreationsKey = 'tasknest_recent_creations';
@@ -728,6 +728,7 @@ export const useAppStore = create<AppState>()(
       isPrivate,
       status: 'todo',
       priority,
+      dueDate: dueDate || undefined,
       tags: [isPrivate ? 'Personal' : 'Team'],
       owner: activeUser,
       members: [{ user: activeUser, permission: 'owner', status: 'accepted' }],
@@ -753,6 +754,7 @@ export const useAppStore = create<AppState>()(
             is_private: isPrivate,
             status: 'todo',
             priority,
+            due_date: dueDate || null,
             tags: tempNote.tags,
             checklist: [],
             pinned: false,
