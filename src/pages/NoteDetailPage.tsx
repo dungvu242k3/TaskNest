@@ -35,6 +35,7 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
     addChecklistItem,
     deleteChecklistItem,
     updateChecklistItem,
+    updateMemberPermission,
   } = useAppStore();
 
   const note = notes.find((n) => n.id === id);
@@ -357,7 +358,11 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
                   </span>
                 </label>
                 <div className="pt-1">
-                  <AvatarStack members={note.members} showNames={true} />
+                  <AvatarStack
+                    members={note.members}
+                    showNames={true}
+                    onPermissionChange={(userId, perm) => updateMemberPermission(note.id, userId, perm)}
+                  />
                 </div>
               </div>
             )}

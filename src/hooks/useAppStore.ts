@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Note, NoteStatus, PriorityLevel } from '../types';
+import { Note, NoteStatus, PriorityLevel, MemberPermission } from '../types';
 import { MOCK_NOTES, CURRENT_USER } from '../constants/mockData';
 
 interface AppState {
@@ -22,6 +22,7 @@ interface AppState {
   addChecklistItem: (noteId: string, text: string) => void;
   deleteChecklistItem: (noteId: string, checklistId: string) => void;
   updateChecklistItem: (noteId: string, checklistId: string, text: string) => void;
+  updateMemberPermission: (noteId: string, userId: string, permission: MemberPermission) => void;
   addNote: (title: string, isPrivate: boolean, priority?: PriorityLevel) => Note;
   deleteNote: (id: string) => void;
 }
@@ -139,5 +140,20 @@ export const useAppStore = create<AppState>((set, get) => ({
     set((state) => ({
       notes: state.notes.filter((n) => n.id !== id),
       quickPeekNoteId: state.quickPeekNoteId === id ? null : state.quickPeekNoteId,
+    })),
+
+  updateMemberPermission: (noteId, userId, permission) =>
+    set((state) => ({
+      notes: state.notes.map((note) =>
+        note.id === noteId
+          ? {
+              ...note,
+              members: note.members.map((m) =>
+                m.user.id === userId ? { ...m, permission } : m
+              ),
+              updatedAt: new Date().toISOString(),
+            }
+          : note
+      ),
     })),
 }));

@@ -1,27 +1,24 @@
 import React from 'react';
-import { NoteMember } from '../../types';
+import { NoteMember, MemberPermission } from '../../types';
 
 interface AvatarStackProps {
   members: NoteMember[];
   maxDisplay?: number;
   showNames?: boolean;
+  onPermissionChange?: (userId: string, permission: MemberPermission) => void;
 }
 
 export const AvatarStack: React.FC<AvatarStackProps> = ({
   members,
   maxDisplay = 4,
   showNames = false,
+  onPermissionChange,
 }) => {
   if (showNames) {
     return (
       <div className="space-y-2">
         {members.map((member) => {
-          const permissionText =
-            member.permission === 'owner'
-              ? 'Chủ sở hữu'
-              : member.permission === 'edit'
-              ? 'Quyền chỉnh sửa'
-              : 'Chỉ xem';
+          const isOwner = member.permission === 'owner';
 
           return (
             <div
@@ -44,9 +41,26 @@ export const AvatarStack: React.FC<AvatarStackProps> = ({
                 </div>
               </div>
 
-              <span className="text-[10px] font-medium px-2 py-0.5 rounded-lg bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 shrink-0">
-                {permissionText}
-              </span>
+              {isOwner ? (
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0">
+                  Chủ sở hữu
+                </span>
+              ) : (
+                <select
+                  value={member.permission}
+                  onChange={(e) =>
+                    onPermissionChange?.(member.user.id, e.target.value as MemberPermission)
+                  }
+                  className="text-[10px] font-medium px-2 py-1 rounded-lg bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 focus:outline-none focus:border-indigo-400 cursor-pointer transition-colors"
+                >
+                  <option value="edit" className="bg-slate-900 text-slate-200">
+                    Quyền chỉnh sửa
+                  </option>
+                  <option value="view" className="bg-slate-900 text-slate-200">
+                    Chỉ xem
+                  </option>
+                </select>
+              )}
             </div>
           );
         })}
