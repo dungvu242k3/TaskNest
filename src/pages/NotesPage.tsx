@@ -70,23 +70,31 @@ export const NotesPage: React.FC<NotesPageProps> = ({
     );
   }
 
-  // Synchronize active selected note
+  // Synchronize active selected note & ensure clean URL routing
   useEffect(() => {
-    if (noteIdParam && notes.some((n) => n.id === noteIdParam)) {
-      setSelectedNoteId(noteIdParam);
+    if (routeId && notes.some((n) => n.id === routeId)) {
+      setSelectedNoteId(routeId);
     } else if (filteredNotes.length > 0) {
-      if (!selectedNoteId || !filteredNotes.some((n) => n.id === selectedNoteId)) {
-        setSelectedNoteId(filteredNotes[0].id);
+      const defaultId = filteredNotes[0].id;
+      setSelectedNoteId(defaultId);
+      if (!routeId) {
+        const tab = searchParams.get('tab');
+        const tabQuery = tab && tab !== 'all' ? `?tab=${tab}` : '';
+        navigate(`/notes/${defaultId}${tabQuery}`, { replace: true });
       }
     } else {
       setSelectedNoteId(null);
     }
-  }, [filteredNotes, noteIdParam, notes, selectedNoteId]);
+  }, [filteredNotes, routeId, notes, navigate, searchParams]);
 
   const handleTabChange = (tab: string) => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
-      next.set('tab', tab);
+      if (tab === 'all') {
+        next.delete('tab');
+      } else {
+        next.set('tab', tab);
+      }
       return next;
     });
   };
@@ -94,7 +102,7 @@ export const NotesPage: React.FC<NotesPageProps> = ({
   const handleSelectNote = (id: string) => {
     setSelectedNoteId(id);
     const tab = searchParams.get('tab');
-    const tabQuery = tab ? `?tab=${tab}` : '';
+    const tabQuery = tab && tab !== 'all' ? `?tab=${tab}` : '';
     navigate(`/notes/${id}${tabQuery}`);
   };
 

@@ -107,7 +107,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateNoteModal }) => {
               <div className="ml-4 pl-3 border-l border-surface-border/60 my-1 space-y-1">
                 {/* Child 1: Tất cả ghi chú */}
                 <NavLink
-                  to="/notes?tab=all"
+                  to="/notes"
                   className={() =>
                     `flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium border border-transparent transition-colors focus:outline-none ${
                       isNotesActive && (currentTab === 'all' || !currentTab)
