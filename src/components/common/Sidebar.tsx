@@ -53,7 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateNoteModal }) => {
         <div className="p-4">
           <button
             onClick={onOpenCreateNoteModal}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-all"
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-glow transition-colors focus:outline-none"
           >
             <Plus className="h-4 w-4" />
             <span>Tạo ghi chú mới</span>
@@ -67,9 +67,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateNoteModal }) => {
             to="/"
             end
             className={({ isActive }) =>
-              `flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
+              `flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium border border-transparent transition-colors focus:outline-none ${
                 isActive
-                  ? 'bg-indigo-600/15 text-indigo-400 border border-indigo-500/30 font-semibold'
+                  ? 'bg-indigo-600/15 text-indigo-400 border-indigo-500/30 font-semibold'
                   : 'text-slate-400 hover:text-slate-100 hover:bg-surface-hover'
               }`
             }
@@ -84,9 +84,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateNoteModal }) => {
           <div>
             <button
               onClick={() => setIsNotesMenuOpen(!isNotesMenuOpen)}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold border border-transparent transition-colors focus:outline-none ${
                 isNotesActive
-                  ? 'text-indigo-400 bg-indigo-500/10 border border-indigo-500/20'
+                  ? 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20'
                   : 'text-slate-300 hover:text-white hover:bg-surface-hover'
               }`}
             >
@@ -109,9 +109,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateNoteModal }) => {
                 <NavLink
                   to="/notes?tab=all"
                   className={() =>
-                    `flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                    `flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium border border-transparent transition-colors focus:outline-none ${
                       isNotesActive && (currentTab === 'all' || !currentTab)
-                        ? 'bg-indigo-600/20 text-indigo-300 font-semibold border border-indigo-500/30'
+                        ? 'bg-indigo-600/20 text-indigo-300 font-semibold border-indigo-500/30'
                         : 'text-slate-400 hover:text-slate-200 hover:bg-surface-hover'
                     }`
                   }
@@ -127,9 +127,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateNoteModal }) => {
                 <NavLink
                   to="/notes?tab=private"
                   className={() =>
-                    `flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                    `flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium border border-transparent transition-colors focus:outline-none ${
                       isNotesActive && currentTab === 'private'
-                        ? 'bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/30'
+                        ? 'bg-amber-500/20 text-amber-300 font-semibold border-amber-500/30'
                         : 'text-slate-400 hover:text-slate-200 hover:bg-surface-hover'
                     }`
                   }
@@ -145,9 +145,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateNoteModal }) => {
                 <NavLink
                   to="/notes?tab=shared"
                   className={() =>
-                    `flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                    `flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium border border-transparent transition-colors focus:outline-none ${
                       isNotesActive && currentTab === 'shared'
-                        ? 'bg-indigo-600/20 text-indigo-300 font-semibold border border-indigo-500/30'
+                        ? 'bg-indigo-600/20 text-indigo-300 font-semibold border-indigo-500/30'
                         : 'text-slate-400 hover:text-slate-200 hover:bg-surface-hover'
                     }`
                   }
@@ -163,9 +163,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateNoteModal }) => {
                 <NavLink
                   to="/notes?tab=trash"
                   className={() =>
-                    `flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                    `flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium border border-transparent transition-colors focus:outline-none ${
                       isNotesActive && currentTab === 'trash'
-                        ? 'bg-slate-800 text-slate-200 font-semibold border border-slate-700'
+                        ? 'bg-slate-800 text-slate-200 font-semibold border-slate-700'
                         : 'text-slate-400 hover:text-slate-200 hover:bg-surface-hover'
                     }`
                   }
@@ -183,9 +183,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateNoteModal }) => {
           <NavLink
             to="/team"
             className={({ isActive }) =>
-              `flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
+              `flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium border border-transparent transition-colors focus:outline-none ${
                 isActive
-                  ? 'bg-indigo-600/15 text-indigo-400 border border-indigo-500/30 font-semibold'
+                  ? 'bg-indigo-600/15 text-indigo-400 border-indigo-500/30 font-semibold'
                   : 'text-slate-400 hover:text-slate-100 hover:bg-surface-hover'
               }`
             }
@@ -200,9 +200,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateNoteModal }) => {
           <NavLink
             to="/settings"
             className={({ isActive }) =>
-              `flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
+              `flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium border border-transparent transition-colors focus:outline-none ${
                 isActive
-                  ? 'bg-indigo-600/15 text-indigo-400 border border-indigo-500/30 font-semibold'
+                  ? 'bg-indigo-600/15 text-indigo-400 border-indigo-500/30 font-semibold'
                   : 'text-slate-400 hover:text-slate-100 hover:bg-surface-hover'
               }`
             }

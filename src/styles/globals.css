@@ -6,9 +6,18 @@
   :root {
     color-scheme: dark;
   }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
   
   body {
     @apply bg-background text-slate-100 antialiased overflow-x-hidden;
+  }
+
+  /* Prevent browser default white focus frame / outline on click */
+  button, a, input, select, textarea {
+    @apply focus:outline-none;
   }
 }
 
