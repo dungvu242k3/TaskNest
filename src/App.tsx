@@ -31,7 +31,15 @@ export const App: React.FC = () => {
           <main className="flex-1 overflow-y-auto">
             <Routes>
               <Route path="/" element={<DashboardPage />} />
-              <Route path="/notes" element={<NotesPage onOpenCreateNoteModal={() => setCreateNoteModalOpen(true)} />} />
+              <Route
+                path="/notes"
+                element={
+                  <NotesPage
+                    onOpenCreateNoteModal={() => setCreateNoteModalOpen(true)}
+                    onOpenShareModal={() => setShareModalOpen(true)}
+                  />
+                }
+              />
               <Route path="/notes/:id" element={<NoteDetailPage onOpenShareModal={() => setShareModalOpen(true)} />} />
               <Route path="/team" element={<TeamPage onOpenShareModal={() => setShareModalOpen(true)} />} />
               <Route path="/settings" element={<SettingsPage />} />
