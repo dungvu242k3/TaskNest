@@ -27,13 +27,7 @@ export const NotesPage: React.FC<NotesPageProps> = ({
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { notes, togglePinNote, fetchNotesFromSupabase, subscribeToRealtimeNotes } = useAppStore();
-
-  useEffect(() => {
-    fetchNotesFromSupabase();
-    const unsubscribe = subscribeToRealtimeNotes();
-    return () => unsubscribe();
-  }, [fetchNotesFromSupabase, subscribeToRealtimeNotes]);
+  const { notes, togglePinNote } = useAppStore();
 
   const currentTab = searchParams.get('tab') || 'all';
   const [filterPriority, setFilterPriority] = useState<string>('all');

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { Note, NoteStatus, PriorityLevel, MemberPermission, UserProfile } from '../types';
 import { MOCK_NOTES, MOCK_USERS, CURRENT_USER } from '../constants/mockData';
-import { supabase } from '../lib/supabaseClient';
+import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 
 interface DashboardMetrics {
   total_notes: number;
@@ -69,7 +69,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   login: () => set({ isLoggedIn: true, currentUser: CURRENT_USER }),
   logout: async () => {
     try {
-      await supabase.auth.signOut();
+      if (isSupabaseConfigured) {
+        await supabase.auth.signOut();
+      }
     } catch (err) {
       console.warn('Supabase logout notice:', err);
     }
@@ -78,6 +80,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   // 1. Fetch Notes from Supabase DB
   fetchNotesFromSupabase: async () => {
+    if (!isSupabaseConfigured) return;
     set({ isLoadingSupabase: true });
     try {
       const { data, error } = await supabase
@@ -115,6 +118,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   // 2. Fetch Dashboard Analytics Metrics via Supabase RPC Stored Function
   fetchDashboardMetricsFromSupabase: async (userId) => {
+    if (!isSupabaseConfigured) return null;
     try {
       const targetUserId = userId || CURRENT_USER.id;
       const { data, error } = await supabase.rpc('get_user_dashboard_metrics', {
@@ -131,22 +135,34 @@ export const useAppStore = create<AppState>((set, get) => ({
     return null;
   },
 
-  // 3. Realtime Channel Subscription
+  // 3. Realtime Channel Subscription (Safe Single Subscription Guard)
   subscribeToRealtimeNotes: () => {
-    const channel = supabase
-      .channel('public:notes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'notes' },
-        (_payload) => {
-          get().fetchNotesFromSupabase();
-        }
-      )
-      .subscribe();
+    if (!isSupabaseConfigured) return () => {};
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    try {
+      const channelId = `realtime-notes-${Math.random().toString(36).substring(2, 9)}`;
+      const channel = supabase
+        .channel(channelId)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'notes' },
+          (_payload) => {
+            get().fetchNotesFromSupabase();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        try {
+          supabase.removeChannel(channel);
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+      };
+    } catch (err) {
+      console.warn('Supabase realtime channel subscription notice:', err);
+      return () => {};
+    }
   },
 
   // 4. Pin Note with Supabase Sync

@@ -26,14 +26,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onOpenCreateNoteModal,
 }) => {
   const navigate = useNavigate();
-  const { notes, fetchNotesFromSupabase, fetchDashboardMetricsFromSupabase, subscribeToRealtimeNotes } = useAppStore();
+  const { notes, fetchDashboardMetricsFromSupabase } = useAppStore();
 
   useEffect(() => {
-    fetchNotesFromSupabase();
     fetchDashboardMetricsFromSupabase();
-    const unsubscribe = subscribeToRealtimeNotes();
-    return () => unsubscribe();
-  }, [fetchNotesFromSupabase, fetchDashboardMetricsFromSupabase, subscribeToRealtimeNotes]);
+  }, [fetchDashboardMetricsFromSupabase]);
 
   const privateNotes = notes.filter((n) => n.isPrivate);
   const sharedNotes = notes.filter((n) => !n.isPrivate);
