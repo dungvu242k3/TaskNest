@@ -1,17 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Command, Bell, LogIn, LogOut } from 'lucide-react';
+import { Search, Command, Bell, LogIn } from 'lucide-react';
 import { useAppStore } from '../../hooks/useAppStore';
 import { CURRENT_USER } from '../../constants/mockData';
 
 export const Header: React.FC = () => {
   const navigate = useNavigate();
-  const { toggleCommandPalette, isLoggedIn, currentUser, logout } = useAppStore();
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
+  const { toggleCommandPalette, isLoggedIn, currentUser } = useAppStore();
 
   return (
     <header className="h-16 bg-surface/50 backdrop-blur-md border-b border-surface-border px-6 flex items-center justify-between sticky top-0 z-20">
@@ -38,7 +33,7 @@ export const Header: React.FC = () => {
       </div>
 
       {/* Right Header Actions: Notification Bell + Conditional Auth Button / User Profile Avatar */}
-      <div className="flex items-center justify-end gap-3 min-w-48">
+      <div className="flex items-center justify-end gap-3 w-48">
         {/* Notifications */}
         <button
           aria-label="Thông báo"
@@ -61,30 +56,19 @@ export const Header: React.FC = () => {
             <span>Đăng nhập</span>
           </button>
         ) : (
-          /* Show User Avatar & Logout Button when Logged In */
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate('/settings?tab=profile')}
-              aria-label="Hồ sơ cá nhân"
-              title="Xem hồ sơ cá nhân"
-              className="flex items-center gap-2 p-1 rounded-xl hover:bg-surface-hover transition-colors focus:outline-none group"
-            >
-              <img
-                src={currentUser?.avatarUrl || CURRENT_USER.avatarUrl}
-                alt={currentUser?.fullName || CURRENT_USER.fullName}
-                className="h-8 w-8 rounded-full object-cover ring-2 ring-indigo-500/40 group-hover:ring-indigo-400 transition-all"
-              />
-            </button>
-
-            <button
-              onClick={handleLogout}
-              title="Đăng xuất khỏi tài khoản"
-              className="py-1.5 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/20 text-xs font-medium transition-all focus:outline-none flex items-center gap-1.5"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Đăng xuất</span>
-            </button>
-          </div>
+          /* Show ONLY User Avatar when Logged In */
+          <button
+            onClick={() => navigate('/settings?tab=profile')}
+            aria-label="Hồ sơ cá nhân"
+            title="Xem hồ sơ cá nhân"
+            className="flex items-center gap-2 p-1 rounded-xl hover:bg-surface-hover transition-colors focus:outline-none group"
+          >
+            <img
+              src={currentUser?.avatarUrl || CURRENT_USER.avatarUrl}
+              alt={currentUser?.fullName || CURRENT_USER.fullName}
+              className="h-8 w-8 rounded-full object-cover ring-2 ring-indigo-500/40 group-hover:ring-indigo-400 transition-all"
+            />
+          </button>
         )}
       </div>
     </header>
