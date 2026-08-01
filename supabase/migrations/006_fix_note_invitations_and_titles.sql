@@ -1,4 +1,4 @@
--- Migration 006: Complete fix for team_invitations (drop restrictive FK on workspace_id, fix NULL workspace_id, UPSERT logic, and RLS)
+-- Migration 006: Comprehensive fix for team_invitations & note_members tables, RLS policies, and UPSERT logic
 
 -- 1. Ensure ALL required columns exist in team_invitations table
 ALTER TABLE public.team_invitations
@@ -88,7 +88,7 @@ BEGIN
 
         v_invitation_id := v_existing_id;
     ELSE
-        -- Insert new invitation record with NULL workspace_id if p_team_id is null
+        -- Insert new invitation record
         INSERT INTO public.team_invitations (
             email,
             invited_email,
@@ -134,7 +134,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 GRANT EXECUTE ON FUNCTION public.invite_and_check_auth_provider(TEXT, TEXT, UUID, UUID, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.invite_and_check_auth_provider(TEXT, TEXT, UUID, UUID) TO authenticated;
 
--- 4. Robust RLS Policies for team_invitations
+-- 4. RLS Policies for team_invitations
 ALTER TABLE public.team_invitations ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Users can view invitations for their email or created by them" ON public.team_invitations;
@@ -165,3 +165,24 @@ CREATE POLICY "Creators can delete invitations"
 ON public.team_invitations FOR DELETE
 TO authenticated
 USING (invited_by = auth.uid() OR (email IS NOT NULL AND LOWER(email) = LOWER(auth.jwt() ->> 'email')));
+
+-- 5. RLS Policies for note_members
+ALTER TABLE public.note_members ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can insert note members for accepted invites or owned notes" ON public.note_members;
+CREATE POLICY "Users can insert note members for accepted invites or owned notes"
+ON public.note_members FOR INSERT
+TO authenticated
+WITH CHECK (
+  user_id = auth.uid() OR
+  note_id IN (SELECT id FROM public.notes WHERE owner_id = auth.uid())
+);
+
+DROP POLICY IF EXISTS "Users can update note members for owned notes or self" ON public.note_members;
+CREATE POLICY "Users can update note members for owned notes or self"
+ON public.note_members FOR UPDATE
+TO authenticated
+USING (
+  user_id = auth.uid() OR
+  note_id IN (SELECT id FROM public.notes WHERE owner_id = auth.uid())
+);
