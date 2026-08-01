@@ -1,6 +1,6 @@
--- Migration 006: Fix team_invitations column mismatch (email vs invited_email), add note_title and note_id, update RPC & RLS policies
+-- Migration 006: Fix team_invitations column mismatch & NOT NULL constraint on workspace_id, add note_title, update RPC & RLS policies
 
--- 1. Ensure ALL required columns exist in team_invitations table (supporting both email and invited_email)
+-- 1. Ensure ALL required columns exist in team_invitations table
 ALTER TABLE public.team_invitations
 ADD COLUMN IF NOT EXISTS email TEXT,
 ADD COLUMN IF NOT EXISTS invited_email TEXT,
@@ -9,6 +9,11 @@ ADD COLUMN IF NOT EXISTS team_id UUID,
 ADD COLUMN IF NOT EXISTS workspace_id UUID,
 ADD COLUMN IF NOT EXISTS note_title TEXT,
 ADD COLUMN IF NOT EXISTS provider_type TEXT DEFAULT 'email';
+
+-- 2. Drop NOT NULL constraints on workspace_id, team_id, and note_id so invitations can be sent flexibly
+ALTER TABLE public.team_invitations ALTER COLUMN workspace_id DROP NOT NULL;
+ALTER TABLE public.team_invitations ALTER COLUMN team_id DROP NOT NULL;
+ALTER TABLE public.team_invitations ALTER COLUMN note_id DROP NOT NULL;
 
 -- Populate email from invited_email if email is NULL
 UPDATE public.team_invitations
@@ -20,7 +25,7 @@ UPDATE public.team_invitations
 SET invited_email = email
 WHERE invited_email IS NULL AND email IS NOT NULL;
 
--- 2. Update stored procedure: invite_and_check_auth_provider to handle both email and invited_email
+-- 3. Update stored procedure: invite_and_check_auth_provider
 CREATE OR REPLACE FUNCTION public.invite_and_check_auth_provider(
     p_email TEXT,
     p_permission TEXT DEFAULT 'edit',
@@ -33,8 +38,12 @@ DECLARE
     v_target_user RECORD;
     v_provider_type TEXT := 'unregistered';
     v_invitation_id UUID;
+    v_workspace_id UUID;
     v_result JSONB;
 BEGIN
+    -- Fallback workspace ID if p_team_id is null
+    v_workspace_id := COALESCE(p_team_id, '00000000-0000-0000-0000-000000000000'::uuid);
+
     -- Search for existing user in auth.users by email
     SELECT id, raw_app_meta_data, raw_user_meta_data
     INTO v_target_user
@@ -43,7 +52,6 @@ BEGIN
     LIMIT 1;
 
     IF v_target_user.id IS NOT NULL THEN
-        -- Inspect auth provider from app metadata or user metadata
         IF COALESCE(v_target_user.raw_app_meta_data->>'provider', '') = 'google'
            OR COALESCE(v_target_user.raw_user_meta_data->>'iss', '') LIKE '%google%' THEN
             v_provider_type := 'google';
@@ -51,7 +59,6 @@ BEGIN
             v_provider_type := 'email';
         END IF;
     ELSE
-        -- Default heuristic for unregistered @gmail.com vs standard domain
         IF LOWER(p_email) LIKE '%@gmail.com' THEN
             v_provider_type := 'google';
         ELSE
@@ -59,7 +66,7 @@ BEGIN
         END IF;
     END IF;
 
-    -- Insert invitation record into public.team_invitations (filling both email and invited_email)
+    -- Insert invitation record into public.team_invitations
     INSERT INTO public.team_invitations (
         email,
         invited_email,
@@ -77,7 +84,7 @@ BEGIN
         p_note_id,
         p_note_title,
         p_team_id,
-        p_team_id,
+        v_workspace_id,
         auth.uid(),
         p_permission,
         'pending',
@@ -104,7 +111,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 GRANT EXECUTE ON FUNCTION public.invite_and_check_auth_provider(TEXT, TEXT, UUID, UUID, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.invite_and_check_auth_provider(TEXT, TEXT, UUID, UUID) TO authenticated;
 
--- 3. Robust RLS Policies for team_invitations
+-- 4. Robust RLS Policies for team_invitations
 ALTER TABLE public.team_invitations ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Users can view invitations for their email or created by them" ON public.team_invitations;
