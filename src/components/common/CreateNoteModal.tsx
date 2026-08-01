@@ -44,10 +44,10 @@ export const CreateNoteModal: React.FC<CreateNoteModalProps> = ({ isOpen, onClos
         role="dialog"
         aria-modal="true"
         aria-label="Tạo ghi chú mới"
-        className="w-full max-w-lg bg-surface border border-surface-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+        className="w-full max-w-lg bg-surface border border-surface-border rounded-2xl shadow-2xl overflow-visible animate-in fade-in zoom-in-95 duration-150"
       >
         {/* Header */}
-        <div className="p-5 border-b border-surface-border flex items-center justify-between bg-surface-hover/30">
+        <div className="p-5 border-b border-surface-border flex items-center justify-between bg-surface-hover/30 rounded-t-2xl">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">
               <Plus className="h-5 w-5" />
@@ -150,9 +150,9 @@ export const CreateNoteModal: React.FC<CreateNoteModalProps> = ({ isOpen, onClos
           </div>
 
           {/* Priority Level & Due Date Selectors */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 relative z-20">
             {/* Priority Selector */}
-            <div>
+            <div className="relative z-30">
               <label className="text-xs font-semibold text-slate-300 block mb-1.5">
                 Mức độ Ưu tiên
               </label>
@@ -163,7 +163,7 @@ export const CreateNoteModal: React.FC<CreateNoteModalProps> = ({ isOpen, onClos
             </div>
 
             {/* Due Date Picker */}
-            <div>
+            <div className="relative z-20">
               <label className="text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3.5 w-3.5 text-indigo-400" />
