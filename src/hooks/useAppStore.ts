@@ -510,6 +510,9 @@ export const useAppStore = create<AppState>()(
 
   // 1g. Accept Invitation
   acceptInvitationInSupabase: async (invitationId) => {
+    const isValidUUID = (str?: string | null) =>
+      !!str && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(str);
+
     const targetInvite = get().invitations.find((i) => i.id === invitationId);
     const currUser = get().currentUser || CURRENT_USER;
 
@@ -554,7 +557,7 @@ export const useAppStore = create<AppState>()(
       }
     }
 
-    if (isSupabaseConfigured) {
+    if (isSupabaseConfigured && isValidUUID(invitationId)) {
       try {
         await supabase
           .from('team_invitations')
@@ -570,11 +573,14 @@ export const useAppStore = create<AppState>()(
 
   // 1h. Cancel / Revoke Invitation
   cancelInvitationInSupabase: async (invitationId) => {
+    const isValidUUID = (str?: string | null) =>
+      !!str && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(str);
+
     set((state) => ({
       invitations: state.invitations.filter((i) => i.id !== invitationId),
     }));
 
-    if (isSupabaseConfigured) {
+    if (isSupabaseConfigured && isValidUUID(invitationId)) {
       try {
         await supabase
           .from('team_invitations')
