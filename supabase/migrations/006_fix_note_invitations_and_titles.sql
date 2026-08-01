@@ -1,4 +1,4 @@
--- Migration 006: Comprehensive fix for team_invitations & note_members tables, RLS policies, and UPSERT logic
+-- Migration 006: Comprehensive fix for team_invitations & note_members tables, RLS policies, UPSERT logic, and Supabase Realtime Replication
 
 -- 1. Ensure ALL required columns exist in team_invitations table
 ALTER TABLE public.team_invitations
@@ -186,3 +186,15 @@ USING (
   user_id = auth.uid() OR
   note_id IN (SELECT id FROM public.notes WHERE owner_id = auth.uid())
 );
+
+-- 6. Enable Supabase Realtime Replication on tables
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.notes;
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.note_members;
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.team_invitations;
+  END IF;
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END $$;
