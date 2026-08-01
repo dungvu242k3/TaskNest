@@ -461,7 +461,7 @@ export const useAppStore = create<AppState>()(
               invited_email: sanitizedEmail,
               permission,
               team_id: validTeamId,
-              workspace_id: validTeamId || '00000000-0000-0000-0000-000000000000',
+              workspace_id: validTeamId,
               invited_by: currentUserId,
               status: 'pending',
               provider_type: inferredProviderType,
