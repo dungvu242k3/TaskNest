@@ -6,6 +6,7 @@ interface DatePickerProps {
   onChange: (date: string) => void;
   placeholder?: string;
   className?: string;
+  position?: 'top' | 'bottom' | 'auto';
 }
 
 const MONTH_NAMES = [
@@ -30,8 +31,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   onChange,
   placeholder = 'Chọn hạn chót...',
   className = '',
+  position = 'auto',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [popDirection, setPopDirection] = useState<'top' | 'bottom'>('bottom');
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Parsed date or current date for view
@@ -40,6 +43,25 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
   const [viewYear, setViewYear] = useState(initialViewDate.getFullYear());
   const [viewMonth, setViewMonth] = useState(initialViewDate.getMonth());
+
+  // Auto detect position (pop top vs bottom)
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      if (position === 'top') {
+        setPopDirection('top');
+      } else if (position === 'bottom') {
+        setPopDirection('bottom');
+      } else {
+        const rect = containerRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        if (spaceBelow < 330 && rect.top > 300) {
+          setPopDirection('top');
+        } else {
+          setPopDirection('bottom');
+        }
+      }
+    }
+  }, [isOpen, position]);
 
   // Close popover on click outside
   useEffect(() => {
@@ -168,7 +190,11 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
       {/* Popover Calendar */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 z-50 w-72 rounded-2xl bg-[#141824]/95 backdrop-blur-xl border border-surface-border/80 shadow-2xl p-4 animate-in fade-in zoom-in-95 duration-150 space-y-3">
+        <div
+          className={`absolute right-0 z-50 w-72 rounded-2xl bg-[#141824]/95 backdrop-blur-xl border border-surface-border/80 shadow-2xl p-4 animate-in fade-in zoom-in-95 duration-150 space-y-3 ${
+            popDirection === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
+          }`}
+        >
           {/* Calendar Header: Prev / Month Year / Next */}
           <div className="flex items-center justify-between pb-2 border-b border-surface-border/40">
             <button
