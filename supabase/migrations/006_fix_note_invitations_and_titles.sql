@@ -1,10 +1,26 @@
--- Migration 006: Add note_title column to team_invitations, update RPC and RLS policies
+-- Migration 006: Fix team_invitations column mismatch (email vs invited_email), add note_title and note_id, update RPC & RLS policies
 
--- 1. Add note_title column to team_invitations if not exists
+-- 1. Ensure ALL required columns exist in team_invitations table (supporting both email and invited_email)
 ALTER TABLE public.team_invitations
-ADD COLUMN IF NOT EXISTS note_title TEXT;
+ADD COLUMN IF NOT EXISTS email TEXT,
+ADD COLUMN IF NOT EXISTS invited_email TEXT,
+ADD COLUMN IF NOT EXISTS note_id UUID,
+ADD COLUMN IF NOT EXISTS team_id UUID,
+ADD COLUMN IF NOT EXISTS workspace_id UUID,
+ADD COLUMN IF NOT EXISTS note_title TEXT,
+ADD COLUMN IF NOT EXISTS provider_type TEXT DEFAULT 'email';
 
--- 2. Update stored procedure: invite_and_check_auth_provider to handle p_note_title
+-- Populate email from invited_email if email is NULL
+UPDATE public.team_invitations
+SET email = invited_email
+WHERE email IS NULL AND invited_email IS NOT NULL;
+
+-- Populate invited_email from email if invited_email is NULL
+UPDATE public.team_invitations
+SET invited_email = email
+WHERE invited_email IS NULL AND email IS NOT NULL;
+
+-- 2. Update stored procedure: invite_and_check_auth_provider to handle both email and invited_email
 CREATE OR REPLACE FUNCTION public.invite_and_check_auth_provider(
     p_email TEXT,
     p_permission TEXT DEFAULT 'edit',
@@ -43,20 +59,24 @@ BEGIN
         END IF;
     END IF;
 
-    -- Insert invitation record into public.team_invitations
+    -- Insert invitation record into public.team_invitations (filling both email and invited_email)
     INSERT INTO public.team_invitations (
         email,
+        invited_email,
         note_id,
         note_title,
         team_id,
+        workspace_id,
         invited_by,
         permission,
         status,
         provider_type
     ) VALUES (
         LOWER(p_email),
+        LOWER(p_email),
         p_note_id,
         p_note_title,
+        p_team_id,
         p_team_id,
         auth.uid(),
         p_permission,
@@ -95,6 +115,7 @@ USING (
   invited_by = auth.uid() 
   OR status = 'pending' 
   OR (email IS NOT NULL AND LOWER(email) = LOWER(auth.jwt() ->> 'email'))
+  OR (invited_email IS NOT NULL AND LOWER(invited_email) = LOWER(auth.jwt() ->> 'email'))
 );
 
 DROP POLICY IF EXISTS "Authenticated users can send invitations" ON public.team_invitations;
