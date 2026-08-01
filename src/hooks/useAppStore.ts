@@ -661,6 +661,42 @@ export const useAppStore = create<AppState>()(
     }
   },
 
+  // 1i. Subscribe to Realtime DB Changes across accounts
+  subscribeToRealtimeNotes: () => {
+    if (!isSupabaseConfigured) return () => {};
+
+    const channel = supabase
+      .channel('tasknest_realtime_channel')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'team_invitations' },
+        () => {
+          get().fetchInvitationsFromSupabase();
+          get().fetchNotesFromSupabase();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'note_members' },
+        () => {
+          get().fetchNotesFromSupabase();
+          get().fetchProfilesFromSupabase();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'notes' },
+        () => {
+          get().fetchNotesFromSupabase();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  },
+
   // 2. Fetch Dashboard Analytics Metrics via Supabase RPC Stored Function
   fetchDashboardMetricsFromSupabase: async (userId) => {
     if (!isSupabaseConfigured) return null;
@@ -685,43 +721,6 @@ export const useAppStore = create<AppState>()(
       console.warn('Supabase RPC dashboard metrics fallback to calculation:', err);
     }
     return null;
-  },
-
-  // 3. Realtime Channel Subscription (Safe Single Subscription Guard)
-  subscribeToRealtimeNotes: () => {
-    if (!isSupabaseConfigured) return () => {};
-
-    try {
-      const channelId = `realtime-notes-${Math.random().toString(36).substring(2, 9)}`;
-      const channel = supabase
-        .channel(channelId)
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'notes' },
-          (_payload) => {
-            get().fetchNotesFromSupabase();
-          }
-        )
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'team_invitations' },
-          (_payload) => {
-            get().fetchInvitationsFromSupabase();
-          }
-        )
-        .subscribe();
-
-      return () => {
-        try {
-          supabase.removeChannel(channel);
-        } catch (e) {
-          // Ignore cleanup errors
-        }
-      };
-    } catch (err) {
-      console.warn('Supabase realtime channel subscription notice:', err);
-      return () => {};
-    }
   },
 
   // 4. Pin Note with Supabase Sync & Auto-Sort to Top
