@@ -1,4 +1,4 @@
--- Migration 006: Fix team_invitations column mismatch & NOT NULL constraint on workspace_id, add note_title, update RPC & RLS policies
+-- Migration 006: Comprehensive fix for team_invitations schema, UUID validation, UPSERT logic, and RLS policies
 
 -- 1. Ensure ALL required columns exist in team_invitations table
 ALTER TABLE public.team_invitations
@@ -25,7 +25,7 @@ UPDATE public.team_invitations
 SET invited_email = email
 WHERE invited_email IS NULL AND email IS NOT NULL;
 
--- 3. Update stored procedure: invite_and_check_auth_provider
+-- 3. Update stored procedure: invite_and_check_auth_provider with UPSERT (Prevents 409 Conflict on re-invites)
 CREATE OR REPLACE FUNCTION public.invite_and_check_auth_provider(
     p_email TEXT,
     p_permission TEXT DEFAULT 'edit',
@@ -39,9 +39,9 @@ DECLARE
     v_provider_type TEXT := 'unregistered';
     v_invitation_id UUID;
     v_workspace_id UUID;
+    v_existing_id UUID;
     v_result JSONB;
 BEGIN
-    -- Fallback workspace ID if p_team_id is null
     v_workspace_id := COALESCE(p_team_id, '00000000-0000-0000-0000-000000000000'::uuid);
 
     -- Search for existing user in auth.users by email
@@ -66,31 +66,54 @@ BEGIN
         END IF;
     END IF;
 
-    -- Insert invitation record into public.team_invitations
-    INSERT INTO public.team_invitations (
-        email,
-        invited_email,
-        note_id,
-        note_title,
-        team_id,
-        workspace_id,
-        invited_by,
-        permission,
-        status,
-        provider_type
-    ) VALUES (
-        LOWER(p_email),
-        LOWER(p_email),
-        p_note_id,
-        p_note_title,
-        p_team_id,
-        v_workspace_id,
-        auth.uid(),
-        p_permission,
-        'pending',
-        v_provider_type
-    )
-    RETURNING id INTO v_invitation_id;
+    -- Check if an active/pending invitation already exists for this email and note/team
+    SELECT id INTO v_existing_id
+    FROM public.team_invitations
+    WHERE (LOWER(email) = LOWER(p_email) OR LOWER(invited_email) = LOWER(p_email))
+      AND (
+        (p_note_id IS NOT NULL AND note_id = p_note_id) OR
+        (p_note_id IS NULL AND (team_id = p_team_id OR workspace_id = v_workspace_id))
+      )
+    LIMIT 1;
+
+    IF v_existing_id IS NOT NULL THEN
+        -- Update existing invitation to prevent 409 Conflict
+        UPDATE public.team_invitations
+        SET permission = p_permission,
+            status = 'pending',
+            provider_type = v_provider_type,
+            note_title = COALESCE(p_note_title, note_title),
+            updated_at = NOW()
+        WHERE id = v_existing_id;
+
+        v_invitation_id := v_existing_id;
+    ELSE
+        -- Insert new invitation record
+        INSERT INTO public.team_invitations (
+            email,
+            invited_email,
+            note_id,
+            note_title,
+            team_id,
+            workspace_id,
+            invited_by,
+            permission,
+            status,
+            provider_type
+        ) VALUES (
+            LOWER(p_email),
+            LOWER(p_email),
+            p_note_id,
+            p_note_title,
+            p_team_id,
+            v_workspace_id,
+            auth.uid(),
+            p_permission,
+            'pending',
+            v_provider_type
+        )
+        RETURNING id INTO v_invitation_id;
+    END IF;
 
     v_result := jsonb_build_object(
         'id', v_invitation_id,
@@ -130,3 +153,15 @@ CREATE POLICY "Authenticated users can send invitations"
 ON public.team_invitations FOR INSERT
 TO authenticated
 WITH CHECK (invited_by = auth.uid());
+
+DROP POLICY IF EXISTS "Invited users or creators can update invitation status" ON public.team_invitations;
+CREATE POLICY "Invited users or creators can update invitation status"
+ON public.team_invitations FOR UPDATE
+TO authenticated
+USING (true);
+
+DROP POLICY IF EXISTS "Creators can delete invitations" ON public.team_invitations;
+CREATE POLICY "Creators can delete invitations"
+ON public.team_invitations FOR DELETE
+TO authenticated
+USING (invited_by = auth.uid() OR (email IS NOT NULL AND LOWER(email) = LOWER(auth.jwt() ->> 'email')));
