@@ -168,6 +168,43 @@ export const useAppStore = create<AppState>()(
 
       if (error) throw error;
       if (data) {
+        const isValidUUID = (str?: string | null) =>
+          !!str && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(str);
+
+        const noteIds = data.map((n: any) => n.id).filter(isValidUUID);
+        const membersByNoteId = new Map<string, { user: UserProfile; permission: MemberPermission; status: 'pending' | 'accepted' }[]>();
+
+        if (noteIds.length > 0) {
+          try {
+            const { data: membersRaw } = await supabase
+              .from('note_members')
+              .select('note_id, user_id, permission, status, profiles(id, full_name, email, avatar_url)')
+              .in('note_id', noteIds);
+
+            if (membersRaw) {
+              membersRaw.forEach((m: any) => {
+                if (!m.note_id) return;
+                const profile = m.profiles;
+                const memberUser: UserProfile = {
+                  id: m.user_id,
+                  fullName: profile?.full_name || profile?.email?.split('@')[0] || 'Thành viên',
+                  email: profile?.email || '',
+                  avatarUrl: profile?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
+                };
+                const existingList = membersByNoteId.get(m.note_id) || [];
+                existingList.push({
+                  user: memberUser,
+                  permission: (m.permission as MemberPermission) || 'edit',
+                  status: (m.status as 'pending' | 'accepted') || 'accepted',
+                });
+                membersByNoteId.set(m.note_id, existingList);
+              });
+            }
+          } catch (mErr) {
+            console.warn('Supabase fetch note_members notice:', mErr);
+          }
+        }
+
         const activeUser = get().currentUser || CURRENT_USER;
         const mappedNotes: Note[] = data.map((item: any) => {
           const isCurrentUserOwner = item.owner_id === activeUser.id;
@@ -179,6 +216,12 @@ export const useAppStore = create<AppState>()(
                 email: '',
                 avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
               };
+
+          const dbMembers = membersByNoteId.get(item.id) || [];
+          const hasOwnerInMembers = dbMembers.some((m) => m.user.id === item.owner_id);
+          const fullMembers = hasOwnerInMembers
+            ? dbMembers
+            : [{ user: ownerObj, permission: 'owner' as MemberPermission, status: 'accepted' as const }, ...dbMembers];
 
           return {
             id: item.id,
@@ -192,7 +235,7 @@ export const useAppStore = create<AppState>()(
             checklist: item.checklist || [],
             pinned: item.pinned || false,
             owner: ownerObj,
-            members: [{ user: ownerObj, permission: 'owner', status: 'accepted' }],
+            members: fullMembers,
             createdAt: item.created_at || new Date().toISOString(),
             updatedAt: item.updated_at || new Date().toISOString(),
           };
@@ -543,14 +586,14 @@ export const useAppStore = create<AppState>()(
         }),
       }));
 
-      if (isSupabaseConfigured && currUser.id) {
+      if (isSupabaseConfigured && currUser.id && isValidUUID(targetNoteId) && isValidUUID(currUser.id)) {
         try {
-          await supabase.from('note_members').insert({
+          await supabase.from('note_members').upsert({
             note_id: targetNoteId,
             user_id: currUser.id,
             permission: targetInvite.permission,
             status: 'accepted',
-          });
+          }, { onConflict: 'note_id,user_id' });
         } catch (err) {
           console.warn('Supabase add note member notice:', err);
         }
