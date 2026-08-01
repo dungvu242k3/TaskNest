@@ -168,7 +168,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
       {/* Popover Calendar */}
       {isOpen && (
-        <div className="absolute left-0 mt-2 z-50 w-72 rounded-2xl bg-[#141824]/95 backdrop-blur-xl border border-surface-border/80 shadow-2xl p-4 animate-in fade-in zoom-in-95 duration-150 space-y-3">
+        <div className="absolute right-0 mt-2 z-50 w-72 rounded-2xl bg-[#141824]/95 backdrop-blur-xl border border-surface-border/80 shadow-2xl p-4 animate-in fade-in zoom-in-95 duration-150 space-y-3">
           {/* Calendar Header: Prev / Month Year / Next */}
           <div className="flex items-center justify-between pb-2 border-b border-surface-border/40">
             <button
