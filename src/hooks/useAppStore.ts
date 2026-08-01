@@ -455,11 +455,13 @@ export const useAppStore = create<AppState>()(
             }));
           } else {
             const rawTeamId = teamId || get().activeTeamId;
+            const validTeamId = isValidUUID(rawTeamId) ? rawTeamId : null;
             const payload: any = {
               email: sanitizedEmail,
               invited_email: sanitizedEmail,
               permission,
-              team_id: isValidUUID(rawTeamId) ? rawTeamId : null,
+              team_id: validTeamId,
+              workspace_id: validTeamId || '00000000-0000-0000-0000-000000000000',
               invited_by: currentUserId,
               status: 'pending',
               provider_type: inferredProviderType,
