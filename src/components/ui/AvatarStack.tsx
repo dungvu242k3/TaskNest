@@ -5,6 +5,7 @@ interface AvatarStackProps {
   members: NoteMember[];
   maxDisplay?: number;
   showNames?: boolean;
+  canManagePermissions?: boolean;
   onPermissionChange?: (userId: string, permission: MemberPermission) => void;
 }
 
@@ -12,6 +13,7 @@ export const AvatarStack: React.FC<AvatarStackProps> = ({
   members,
   maxDisplay = 4,
   showNames = false,
+  canManagePermissions = false,
   onPermissionChange,
 }) => {
   if (showNames) {
@@ -45,11 +47,11 @@ export const AvatarStack: React.FC<AvatarStackProps> = ({
                 <span className="text-[10px] font-medium px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0">
                   Chủ sở hữu
                 </span>
-              ) : (
+              ) : canManagePermissions && onPermissionChange ? (
                 <select
                   value={member.permission}
                   onChange={(e) =>
-                    onPermissionChange?.(member.user.id, e.target.value as MemberPermission)
+                    onPermissionChange(member.user.id, e.target.value as MemberPermission)
                   }
                   className="text-[10px] font-medium px-2 py-1 rounded-lg bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 focus:outline-none focus:border-indigo-400 cursor-pointer transition-colors"
                 >
@@ -60,6 +62,10 @@ export const AvatarStack: React.FC<AvatarStackProps> = ({
                     Chỉ xem
                   </option>
                 </select>
+              ) : (
+                <span className="text-[10px] font-medium px-2.5 py-1 rounded-lg bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 shrink-0">
+                  {member.permission === 'edit' ? 'Quyền chỉnh sửa' : 'Chỉ xem'}
+                </span>
               )}
             </div>
           );

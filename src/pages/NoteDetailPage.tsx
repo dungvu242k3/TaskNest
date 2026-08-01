@@ -376,7 +376,8 @@ export const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ onOpenShareModal
                   <AvatarStack
                     members={note.members}
                     showNames={true}
-                    onPermissionChange={(userId, perm) => updateMemberPermission(note.id, userId, perm)}
+                    canManagePermissions={isOwner}
+                    onPermissionChange={isOwner ? (userId, perm) => updateMemberPermission(note.id, userId, perm) : undefined}
                   />
                 </div>
               </div>
