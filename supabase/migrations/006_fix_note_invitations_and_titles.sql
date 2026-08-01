@@ -1,4 +1,4 @@
--- Migration 006: Comprehensive fix for team_invitations schema, UUID validation, UPSERT logic, and RLS policies
+-- Migration 006: Complete fix for team_invitations (drop restrictive FK on workspace_id, fix NULL workspace_id, UPSERT logic, and RLS)
 
 -- 1. Ensure ALL required columns exist in team_invitations table
 ALTER TABLE public.team_invitations
@@ -10,10 +10,13 @@ ADD COLUMN IF NOT EXISTS workspace_id UUID,
 ADD COLUMN IF NOT EXISTS note_title TEXT,
 ADD COLUMN IF NOT EXISTS provider_type TEXT DEFAULT 'email';
 
--- 2. Drop NOT NULL constraints on workspace_id, team_id, and note_id so invitations can be sent flexibly
+-- 2. Drop NOT NULL constraints and restrictive FK constraints on workspace_id so NULL workspace_id is permitted
 ALTER TABLE public.team_invitations ALTER COLUMN workspace_id DROP NOT NULL;
 ALTER TABLE public.team_invitations ALTER COLUMN team_id DROP NOT NULL;
 ALTER TABLE public.team_invitations ALTER COLUMN note_id DROP NOT NULL;
+
+-- Drop foreign key constraint on workspace_id to prevent error 23503
+ALTER TABLE public.team_invitations DROP CONSTRAINT IF EXISTS team_invitations_workspace_id_fkey;
 
 -- Populate email from invited_email if email is NULL
 UPDATE public.team_invitations
@@ -25,7 +28,7 @@ UPDATE public.team_invitations
 SET invited_email = email
 WHERE invited_email IS NULL AND email IS NOT NULL;
 
--- 3. Update stored procedure: invite_and_check_auth_provider with UPSERT (Prevents 409 Conflict on re-invites)
+-- 3. Update stored procedure: invite_and_check_auth_provider with clean NULL workspace_id handling and UPSERT
 CREATE OR REPLACE FUNCTION public.invite_and_check_auth_provider(
     p_email TEXT,
     p_permission TEXT DEFAULT 'edit',
@@ -38,12 +41,9 @@ DECLARE
     v_target_user RECORD;
     v_provider_type TEXT := 'unregistered';
     v_invitation_id UUID;
-    v_workspace_id UUID;
     v_existing_id UUID;
     v_result JSONB;
 BEGIN
-    v_workspace_id := COALESCE(p_team_id, '00000000-0000-0000-0000-000000000000'::uuid);
-
     -- Search for existing user in auth.users by email
     SELECT id, raw_app_meta_data, raw_user_meta_data
     INTO v_target_user
@@ -72,7 +72,7 @@ BEGIN
     WHERE (LOWER(email) = LOWER(p_email) OR LOWER(invited_email) = LOWER(p_email))
       AND (
         (p_note_id IS NOT NULL AND note_id = p_note_id) OR
-        (p_note_id IS NULL AND (team_id = p_team_id OR workspace_id = v_workspace_id))
+        (p_note_id IS NULL AND (team_id IS NOT DISTINCT FROM p_team_id))
       )
     LIMIT 1;
 
@@ -88,7 +88,7 @@ BEGIN
 
         v_invitation_id := v_existing_id;
     ELSE
-        -- Insert new invitation record
+        -- Insert new invitation record with NULL workspace_id if p_team_id is null
         INSERT INTO public.team_invitations (
             email,
             invited_email,
@@ -106,7 +106,7 @@ BEGIN
             p_note_id,
             p_note_title,
             p_team_id,
-            v_workspace_id,
+            p_team_id,
             auth.uid(),
             p_permission,
             'pending',
