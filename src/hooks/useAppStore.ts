@@ -434,6 +434,7 @@ export const useAppStore = create<AppState>()(
             p_permission: permission,
             p_note_id: isValidUUID(noteId) ? noteId : null,
             p_team_id: isValidUUID(teamId) ? teamId : null,
+            p_note_title: noteTitle || null,
           });
 
           if (!rpcError && rpcData) {
@@ -444,6 +445,7 @@ export const useAppStore = create<AppState>()(
                       ...i,
                       id: rpcData.id || i.id,
                       providerType: rpcData.provider_type || inferredProviderType,
+                      noteTitle: rpcData.note_title || noteTitle,
                     }
                   : i
               ),
@@ -457,6 +459,7 @@ export const useAppStore = create<AppState>()(
               invited_by: currentUserId,
               status: 'pending',
               provider_type: inferredProviderType,
+              note_title: noteTitle || null,
             };
             if (noteId && isValidUUID(noteId)) {
               payload.note_id = noteId;
@@ -616,6 +619,13 @@ export const useAppStore = create<AppState>()(
           { event: '*', schema: 'public', table: 'notes' },
           (_payload) => {
             get().fetchNotesFromSupabase();
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'team_invitations' },
+          (_payload) => {
+            get().fetchInvitationsFromSupabase();
           }
         )
         .subscribe();
