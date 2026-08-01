@@ -7,6 +7,7 @@ interface PrioritySelectProps {
   onChange: (priority: PriorityLevel) => void;
   className?: string;
   size?: 'sm' | 'md';
+  position?: 'top' | 'bottom' | 'auto';
 }
 
 const priorityOptions: { value: PriorityLevel; label: string; sublabel: string; color: string; badgeBg: string; border: string; icon: React.ReactNode }[] = [
@@ -44,11 +45,32 @@ export const PrioritySelect: React.FC<PrioritySelectProps> = ({
   onChange,
   className = '',
   size = 'md',
+  position = 'auto',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [popDirection, setPopDirection] = useState<'top' | 'bottom'>('bottom');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const selectedOption = priorityOptions.find((opt) => opt.value === priority) || priorityOptions[1];
+
+  // Auto detect position
+  useEffect(() => {
+    if (isOpen && dropdownRef.current) {
+      if (position === 'top') {
+        setPopDirection('top');
+      } else if (position === 'bottom') {
+        setPopDirection('bottom');
+      } else {
+        const rect = dropdownRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        if (spaceBelow < 200 && rect.top > 200) {
+          setPopDirection('top');
+        } else {
+          setPopDirection('bottom');
+        }
+      }
+    }
+  }, [isOpen, position]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -83,7 +105,11 @@ export const PrioritySelect: React.FC<PrioritySelectProps> = ({
 
       {/* Floating Popover Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 left-0 mt-2 z-50 rounded-2xl bg-[#141824]/95 backdrop-blur-xl border border-surface-border/80 shadow-2xl p-1.5 space-y-1 animate-in fade-in zoom-in-95 duration-150">
+        <div
+          className={`absolute right-0 left-0 z-50 rounded-2xl bg-[#141824]/95 backdrop-blur-xl border border-surface-border/80 shadow-2xl p-1.5 space-y-1 animate-in fade-in zoom-in-95 duration-150 ${
+            popDirection === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
+          }`}
+        >
           {priorityOptions.map((opt) => {
             const isSelected = opt.value === priority;
             return (
