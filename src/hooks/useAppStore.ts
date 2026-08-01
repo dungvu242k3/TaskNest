@@ -172,7 +172,32 @@ export const useAppStore = create<AppState>()(
           !!str && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(str);
 
         const noteIds = data.map((n: any) => n.id).filter(isValidUUID);
+        const ownerIds = data.map((n: any) => n.owner_id).filter(isValidUUID);
+        const profilesMap = new Map<string, UserProfile>();
         const membersByNoteId = new Map<string, { user: UserProfile; permission: MemberPermission; status: 'pending' | 'accepted' }[]>();
+
+        // Fetch profiles of all note owners to populate full owner details
+        if (ownerIds.length > 0) {
+          try {
+            const { data: ownerProfiles } = await supabase
+              .from('profiles')
+              .select('id, full_name, email, avatar_url')
+              .in('id', ownerIds);
+
+            if (ownerProfiles) {
+              ownerProfiles.forEach((p: any) => {
+                profilesMap.set(p.id, {
+                  id: p.id,
+                  fullName: p.full_name || p.email?.split('@')[0] || 'Chủ sở hữu',
+                  email: p.email || '',
+                  avatarUrl: p.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
+                });
+              });
+            }
+          } catch (pErr) {
+            console.warn('Supabase fetch owner profiles notice:', pErr);
+          }
+        }
 
         if (noteIds.length > 0) {
           try {
@@ -208,11 +233,12 @@ export const useAppStore = create<AppState>()(
         const activeUser = get().currentUser || CURRENT_USER;
         const mappedNotes: Note[] = data.map((item: any) => {
           const isCurrentUserOwner = item.owner_id === activeUser.id;
+          const fetchedOwnerProfile = profilesMap.get(item.owner_id);
           const ownerObj: UserProfile = isCurrentUserOwner
             ? activeUser
-            : {
+            : fetchedOwnerProfile || {
                 id: item.owner_id,
-                fullName: 'Thành viên',
+                fullName: 'Chủ sở hữu',
                 email: '',
                 avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
               };
