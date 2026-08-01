@@ -365,18 +365,21 @@ export const useAppStore = create<AppState>()(
 
       if (error) throw error;
       if (data) {
-        const mapped: TeamInvitation[] = data.map((item: any) => ({
-          id: item.id,
-          teamId: item.team_id || undefined,
-          noteId: item.note_id || undefined,
-          noteTitle: item.note_title || undefined,
-          email: item.email,
-          invitedBy: get().currentUser || CURRENT_USER,
-          permission: item.permission || 'edit',
-          status: item.status || 'pending',
-          providerType: item.provider_type || (item.email?.toLowerCase().endsWith('@gmail.com') ? 'google' : 'email'),
-          createdAt: item.created_at || new Date().toISOString(),
-        }));
+        const mapped: TeamInvitation[] = data.map((item: any) => {
+          const invEmail = item.email || item.invited_email || '';
+          return {
+            id: item.id,
+            teamId: item.team_id || item.workspace_id || undefined,
+            noteId: item.note_id || undefined,
+            noteTitle: item.note_title || undefined,
+            email: invEmail,
+            invitedBy: get().currentUser || CURRENT_USER,
+            permission: item.permission || 'edit',
+            status: item.status || 'pending',
+            providerType: item.provider_type || (invEmail.toLowerCase().endsWith('@gmail.com') ? 'google' : 'email'),
+            createdAt: item.created_at || new Date().toISOString(),
+          };
+        });
 
         set((state) => {
           const remoteIds = new Set(mapped.map((m) => m.id));
@@ -454,6 +457,7 @@ export const useAppStore = create<AppState>()(
             const rawTeamId = teamId || get().activeTeamId;
             const payload: any = {
               email: sanitizedEmail,
+              invited_email: sanitizedEmail,
               permission,
               team_id: isValidUUID(rawTeamId) ? rawTeamId : null,
               invited_by: currentUserId,
